@@ -1,8 +1,17 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>AdminLTE 2 | Data Tables</title>
+    <title>BuySo | Data Tables</title>
+
+    <!-- Bootstrap 스타일(css) 적용하기 -->
+    <link rel="stylesheet" 
+          href="{% static 'mainapp/bootstrap/css/bootstrap.min.css' %}">
+    <!-- jQuery 자바스크립트(js) 적용하기 -->
+    <script type="text/javascript"
+             src="{% static 'mainapp/js/jquery-3.7.0.min.js' %}"></script>
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
     <!-- Bootstrap 3.3.2 -->
     <link href="../../bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
