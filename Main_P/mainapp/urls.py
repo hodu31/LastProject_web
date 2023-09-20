@@ -31,5 +31,12 @@ urlpatterns = [
 # - INDEX 페이지 2~3
     path('index_2/', views.index2),
     path('index_3/', views.index3),
+    
+    
+### 로그인 처리
+    path('login_chk/', views.login_chk), 
+    path('login/', views.login_pg), 
+### 로그아웃 처리
+    path('logout_chk/', views.logout_chk),
 
 ]

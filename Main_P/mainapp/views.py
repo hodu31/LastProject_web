@@ -1,13 +1,18 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 
+from mainapp.models import Security
+from mainapp.models import Post
+
+from mainapp.main import sec
+
+import datetime
+from django.db.models import Max
+
 # Create your views here.
 
-### mainapp에서 최초 호출 함수로 사용
+### 메인 index 페이지 1~3
 def index(request) :
-    ### 외부 html 파일을 사용하기 위해 render() 사용
-    # - 외부 html은 templates/mainapp에 만들도록 규칙을 만들었습니다.
-    # - setting.py에서 templates 정의해놓았음.
     return render(request,
                   "mainapp/index.html",
                   {})
@@ -20,4 +25,64 @@ def index2(request) :
 def index3(request) :
     return render(request,
                   "mainapp/index_3.html",
+                  {})
+    
+    
+    
+
+### 로그인    
+def login_chk(request) :
+    # - 아이디 및패스워드 전송받기
+    sec_id = request.POST.get("sec_id", "")
+    sec_pw = request.POST.get("sec_pw", "")
+    
+    sec_view = sec.getLoginChk(sec_id,sec_pw)
+    
+    if sec_view.get("result") == "None" :
+        msg = """
+            <script type='text/javascript'>
+            alert('회원 정보가 일치하지 않습니다. 다시 입력해주세요!');
+            location.href='/login/';
+        </script>
+        """
+        return HttpResponse(msg)
+    
+    msg ="{}/ {}/ {}".format(sec_view["sec_id"],
+                              sec_view["sec_pw"],
+                              sec_view["sec_nm"])
+    
+    ### 로그인 인증처리하기 (세션처리하기)
+    # - 조회결과가 있으면 세션객체에 회원정보를 담으면 끝~
+    # - 세션객체는 딕셔너리 타입입니다.
+    # - 세션객체에 값을 담는것은 딕셔너리에 값을 넣는것과 동일함
+    request.session["ses_sec_id"] = sec_id
+    request.session["ses_sec_nm"] = sec_view.get("sec_nm")
+    
+    ## 로그인 인증처리(세션처리) 후 페이지 링크 처리
+    msg = """
+        <script type='text/javascript'>
+        alert('환영합니다.[{}] 님 로그인 되었습니다.');
+        location.href='/';
+        </script>
+    """.format(sec_view.get("sec_nm"))
+    
+    return HttpResponse(msg)
+### 로그아웃
+def logout_chk(request) :
+    msg ="logout.."
+    
+    ### 로그아웃 처리는 session 딕셔너리 key를 없애주면 됩니다.
+    # - 딕셔너리에서 모든 정보를 삭제하는 함수 :flush()
+    request.session.flush()
+    msg = """
+            <script type='text/javascript'>
+            alert('로그아웃 되었습니다.');
+            location.href = '/';
+            </script>
+    """
+    return HttpResponse(msg)
+
+def login_pg(request) :
+    return render(request,
+                  "mainapp/static/pages/examples/login.html",
                   {})

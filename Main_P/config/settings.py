@@ -102,7 +102,7 @@ DATABASES = {
 DATABASE_ROUTERS = [
     ### 앱이름.router파일이름.클래스이름 (클래스이름 바뀔수도 있음)
     # 예시 : 'firstapp.router.DBRouter',
-    'securityapp.router.DBRouter',
+    'mainapp.router.DBRouter',
 ]
 
 ### Logging 처리
