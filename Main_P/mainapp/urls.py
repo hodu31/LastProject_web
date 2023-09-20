@@ -27,7 +27,9 @@ from django.urls import path
 urlpatterns = [
 # - http://127.0.0.1:8000/main/ 
     path('', views.index),
-    path('index/', views.index),
-    path('index.html/', views.index),
-    path('', admin.site.urls),
+    
+# - INDEX 페이지 2~3
+    path('index_2/', views.index2),
+    path('index_3/', views.index3),
+
 ]

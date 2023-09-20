@@ -11,3 +11,13 @@ def index(request) :
     return render(request,
                   "mainapp/index.html",
                   {})
+    
+def index2(request) :
+    return render(request,
+                  "mainapp/index_2.html",
+                  {})
+    
+def index3(request) :
+    return render(request,
+                  "mainapp/index_3.html",
+                  {})
