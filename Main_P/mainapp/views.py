@@ -1,13 +1,13 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-
 from mainapp.models import Security
 from mainapp.models import Post
-
 from mainapp.main import sec
-
 import datetime
 from django.db.models import Max
+
+from django.shortcuts import render
+import cv2
 
 # Create your views here.
 
@@ -84,5 +84,27 @@ def logout_chk(request) :
 
 def login_pg(request) :
     return render(request,
-                  "mainapp/static/pages/examples/login.html",
+                  "mainapp/login.html",
                   {})
+    
+
+### 웹캠
+def webcam(request):
+    # 웹캠 캡처
+    cap = cv2.VideoCapture(0)
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # OpenCV에서 이미지를 BGR에서 RGB로 변환
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        # 이미지를 HTML 페이지에 렌더링하기 위해 Django context에 추가
+        context = {'frame': frame}
+
+        # index.html 템플릿 렌더링
+        return render(request, 'index.html', context)
+
+    cap.release()

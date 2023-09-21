@@ -38,5 +38,9 @@ urlpatterns = [
     path('login/', views.login_pg), 
 ### 로그아웃 처리
     path('logout_chk/', views.logout_chk),
+    
+    
+### 웹캠
+    path('webcam/', views.webcam, name='webcam'),
 
 ]
