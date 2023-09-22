@@ -272,8 +272,8 @@
               <!-- 로그인 버튼 표시 -->
               <li class="dropdown user user-menu">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                      <img src="/static/mainapp/dist/img/cat5.jpg" class="user-image" alt="User Image"/>
-                      <span class="hidden-xs">yul</span>
+                      <img src="/static/mainapp/dist/img/login-user.jpg" class="user-image" alt="User Image"/> <!-- 이미지 변경 -->
+                      <span class="hidden-xs">로그인</span>
                   </a>
                   <ul class="dropdown-menu">
                       <li><a href="/login/" class="dropdown-item">로그인</a></li>
@@ -283,8 +283,8 @@
               <!-- 로그아웃 버튼 표시 -->
               <li class="dropdown user user-menu">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                      <img src="/static/mainapp/dist/img/cat5.jpg" class="user-image" alt="User Image"/>
-                      <span class="hidden-xs">yul</span>
+                      <img src="/static/mainapp/dist/img/cat5.jpg" class="user-image" alt="User Image"/> <!-- 원래 이미지 유지 -->
+                      <span class="hidden-xs">{{ request.session.ses_sec_nm }}</span>
                   </a>
                   <ul class="dropdown-menu">
                       <li><a href="/" class="dropdown-item" onclick="goLogout()">로그아웃</a></li>
@@ -292,7 +292,6 @@
               </li>
               {% endif %}
               
-  
                 <ul class="dropdown-menu">
                   <!-- User image -->
                   <li class="user-header">
@@ -336,12 +335,20 @@
           <!-- Sidebar user panel -->
           <div class="user-panel">
             <div class="pull-left image">
+              {% if request.session.ses_sec_id == None %}
+              <img src="/static/mainapp/dist/img/login-user.jpg" class="img-circle" alt="User Image" />
+              {% else %}
               <img src="/static/mainapp/dist/img/cat5.jpg" class="img-circle" alt="User Image" />
+              {% endif %}
             </div>
             <div class="pull-left info">
-              <p>Yul</p>
-
-              <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+              {% if request.session.ses_sec_id == None %}
+              <p>Guest</p>
+              <a href="#"><i class="fa fa-circle text-danger"></i> Offline</a> <!-- Offline으로 변경 -->
+              {% else %}
+              <p>{{ request.session.ses_sec_nm }}</p>
+              <a href="#"><i class="fa fa-circle text-success"></i> Online</a> <!-- Online으로 변경 -->
+              {% endif %}
             </div>
           </div>
           <!-- search form -->
@@ -517,7 +524,7 @@
                     <li class="pull-left header"><i class="fa fa-inbox"></i> 실시간 CCTV </li>
                 </ul>
                 <div class="tab-content no-padding" style="width: 100%; height: 100%; border: 0;">
-                    <iframe src="http://127.0.0.1:5000/stream?src=0%E2%80%9D"
+                    <iframe src="http://172.16.11.123:8080/"
                             style="width: 100%; height: 100%; border: 0;"
                             id="if1"></iframe>
                 </div>
@@ -564,15 +571,15 @@
                   <div class="row">
                     <div class="col-xs-4 text-center" style="border-right: 1px solid #f4f4f4">
                       <input type="text" class="knob" data-readonly="true" value="20" data-width="60" data-height="60" data-fgColor="#39CCCC"/>
-                      <div class="knob-label">Mail-Orders</div>
+                      <div class="knob-label">방문객</div>
                     </div><!-- ./col -->
                     <div class="col-xs-4 text-center" style="border-right: 1px solid #f4f4f4">
                       <input type="text" class="knob" data-readonly="true" value="50" data-width="60" data-height="60" data-fgColor="#39CCCC"/>
-                      <div class="knob-label">Online</div>
+                      <div class="knob-label">구매자</div>
                     </div><!-- ./col -->
                     <div class="col-xs-4 text-center">
                       <input type="text" class="knob" data-readonly="true" value="30" data-width="60" data-height="60" data-fgColor="#39CCCC"/>
-                      <div class="knob-label">In-Store</div>
+                      <div class="knob-label">매장 내 체류시간</div>
                     </div><!-- ./col -->
                   </div><!-- /.row -->
                 </div><!-- /.box-footer -->
