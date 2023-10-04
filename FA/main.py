@@ -23,15 +23,10 @@ app = FastAPI()
 
 # 'static' 디렉토리의 정적 파일을 '/static' 경로로 제공
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# 'bootstrap' 디렉토리의 정적 파일을 '/static' 경로로 제공
 app.mount("/bootstrap", StaticFiles(directory="bootstrap"), name="bootstrap")
-
-# 'css' 디렉토리의 정적 파일을 '/static' 경로로 제공
 app.mount("/css", StaticFiles(directory="css"), name="css")
-
-# 'js' 디렉토리의 정적 파일을 '/static' 경로로 제공
 app.mount("/js", StaticFiles(directory="js"), name="js")
+
 
 
 
