@@ -344,10 +344,10 @@
             <div class="pull-left info">
               {% if request.session.ses_sec_id == None %}
               <p>Guest</p>
-              <a href="#"><i class="fa fa-circle text-danger"></i> Offline</a> <!-- Offline으로 변경 -->
+              <a href="/"><i class="fa fa-circle text-danger"></i> Offline</a> <!-- Offline으로 변경 -->
               {% else %}
               <p>{{ request.session.ses_sec_nm }}</p>
-              <a href="#"><i class="fa fa-circle text-success"></i> Online</a> <!-- Online으로 변경 -->
+              <a href="/"><i class="fa fa-circle text-success"></i> Online</a> <!-- Online으로 변경 -->
               {% endif %}
             </div>
           </div>
@@ -524,7 +524,7 @@
                     <li class="pull-left header"><i class="fa fa-inbox"></i> 실시간 CCTV </li>
                 </ul>
                 <div class="tab-content no-padding" style="width: 100%; height: 100%; border: 0;">
-                    <iframe src="http://172.16.11.123:8080/"
+                    <iframe src="http://172.31.98.13:8080/browserfs.html"
                             style="width: 100%; height: 100%; border: 0;"
                             id="if1"></iframe>
                 </div>
