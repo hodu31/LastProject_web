@@ -1,5 +1,5 @@
 ### 필요 라이브러리 등
-from fastapi import FastAPI, Depends, HTTPException, Form
+from fastapi import FastAPI, Depends, HTTPException, Form, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.requests import Request
@@ -8,6 +8,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from databases import Database
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
+
 
 ### 서버 실행 코드: uvicorn main:app --reload ###
 
@@ -26,10 +27,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/bootstrap", StaticFiles(directory="bootstrap"), name="bootstrap")
 app.mount("/css", StaticFiles(directory="css"), name="css")
 app.mount("/js", StaticFiles(directory="js"), name="js")
-
-
-
-
+app.mount("/templates", StaticFiles(directory="templates"), name="templates")
 
 #########################################################
 # 세션 미들웨어 추가 (사용자 세션 관리를 위함)
@@ -52,6 +50,7 @@ class User(Base):
     sec_hp = Column(String)
     sec_area = Column(String)
 
+
 # 루트 경로에 대한 핸들러
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -62,28 +61,45 @@ async def read_root(request: Request):
         user = await database.fetch_one(query)
     return templates.TemplateResponse("index.html", {"request": request, "user": user})
 
+@app.get("/favicon.ico")
+async def favicon():
+    return {}
+
+
+# 모든 페이지에 대한 핸들러
+@app.get("/{page}", response_class=HTMLResponse)
+async def read_page(request: Request, page: str):
+    user_id = request.session.get("user_id")
+    user = None
+    if user_id:
+        query = select(User).where(User.sec_id == user_id)
+        user = await database.fetch_one(query)
+    
+    return templates.TemplateResponse(f"{page}.html", {"request": request, "user": user})
+
 # 로그인 페이지에 대한 핸들러
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
-# 로그인 페이지에 대한 핸들러
+# 가입 페이지에 대한 핸들러
 @app.get("/signup", response_class=HTMLResponse)
 async def signup_page(request: Request):
     return templates.TemplateResponse("signup.html", {"request": request})
 
-# 로그인 처리 핸들러
 @app.post("/login/")
 async def login(request: Request, sec_id: str = Form(...), sec_pw: str = Form(...)):
     query = select(User).where(User.sec_id == sec_id)
     user = await database.fetch_one(query)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        return templates.TemplateResponse("login.html", {"request": request, "error": "입력한 ID 정보가 없습니다."})
     if user.sec_pw != sec_pw:
-        raise HTTPException(status_code=400, detail="Incorrect password")
+        return templates.TemplateResponse("login.html", {"request": request, "error": "패스워드가 잘못되었습니다."})
     
     request.session["user_id"] = sec_id
     return RedirectResponse(url="/", status_code=303)
+
+
 
 # 로그아웃 처리 핸들러
 @app.get("/logout/")
@@ -101,7 +117,6 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     await database.disconnect()
-
 
 ### 회원 가입 기능 추가
 @app.post("/signup")
