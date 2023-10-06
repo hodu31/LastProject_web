@@ -38,6 +38,16 @@
     <!-- bootstrap wysihtml5 - text editor -->
     <link href="/static/mainapp/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css" rel="stylesheet" type="text/css" />
     <!-- 커밋용 -->
+  <style>
+
+    .sidebar-toggle {
+    width: 10px;  /* 원하는 너비로 조절 */
+    height: 10px; /* 원하는 높이로 조절 */
+}
+    .sidebar-toggle::before {
+        vertical-align: middle;
+    }
+</style>
 </head>
 <!--                   네비 다 복사 가능                      -->
   <body class="skin-blue">
@@ -47,7 +57,9 @@
         <a href="/" class="logo"><b>BuySo-</b>Team 3</a>
         <!-- Header Navbar: style can be found in header.less -->
         <nav class="navbar navbar-static-top" role="navigation">
-          <div></div>
+          <div>
+            <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button"></a>
+          </div>
           <div class="navbar-custom-menu">
             <ul class="nav navbar-nav">
               <li class="dropdown tasks-menu">
