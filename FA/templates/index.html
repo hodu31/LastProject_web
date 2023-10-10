@@ -365,9 +365,7 @@
                 </ul>
                 <div class="tab-content no-padding" style="width: 100%; height: 100%; border: 0;">
                     <!-- 카메라 스트림 표시를 위한 video 태그 -->
-                    <video id="cameraStream" autoplay muted></video>
-
-
+                    <video id="cameraStream" src="http://192.168.0.233:4747/mjpegfeed" autoplay muted></video>
                 </div>
             </div>
             <br/>
@@ -507,7 +505,6 @@
     <script src="/static/mainapp/dist/js/demo.js" type="text/javascript"></script>
 
     <!-- 드루이드 캠 스크립트 -->
-    <!-- 드루이드 캠 스크립트 -->
     <script>
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
@@ -564,11 +561,30 @@ async function detectFromVideoFrame() {
         detectFromVideoFrame(video);
     });
 }
+let lastNotifiedTime = 0;
 
+function notifyObjectDetected(message) {
+    const now = Date.now();
+    const timeSinceLastNotification = now - lastNotifiedTime;
+
+    // 10초 이내에는 알람을 다시 표시하지 않음
+    if (timeSinceLastNotification > 10000 || lastNotifiedTime === 0) {
+        alert(message);
+        lastNotifiedTime = now;
+    }
+}
 
     // 모델 로드 시작
     loadModel();
     
+</script>
+
+<script>
+    // 스트림 로드가 완료될 때까지 대기합니다.
+    let video = document.getElementById('cameraStream');
+    video.onloadedmetadata = function() {
+        console.log("Stream loaded");
+    };
 </script>
   </body>
 </html>
