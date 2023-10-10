@@ -61,8 +61,71 @@
       rel="stylesheet"
       type="text/css"
     />
+
+    <style>
+      /* 스마트폰 기준 footer 맞추기 */
+      @media (max-width: 768px) {
+        .main-footer {
+          display: flex;
+          flex-direction: column; /* 수직 방향으로 아이템을 정렬 */
+          align-items: center; /* 가로 방향 중앙 정렬 */
+          justify-content: center; /* 세로 방향 중앙 정렬 */
+          text-align: center; /* 텍스트 중앙 정렬 */
+        }
+
+        .btn-container {
+          display: flex; /* 버튼들을 가로로 배열 */
+          justify-content: center; /* 버튼들을 가운데에 위치시킴 */
+        }
+
+        .btn-flat {
+          width: max-content; /* 버튼의 너비를 내용물에 맞게 조절 */
+          margin: 10px; /* 버튼의 여백을 주고, 좌우 중앙 정렬 */
+        }
+
+        .hidden-xs {
+          display: block;
+        }
+      }
+
+      /* 좌측 사이드 바 드롭다운 토글 아이콘 맞추기 */
+      .sidebar-toggle {
+        position: relative;
+        display: inline-block; /* 블록 요소로 만들어 내부 아이콘과의 간격을 조정할 수 있게 합니다. */
+        padding: 0 20px; /* 오른쪽 패딩을 주어 아이콘을 버튼의 내부 중앙에 위치시킵니다. */
+        line-height: 1.5; /* 버튼 높이와 맞추기 위해 조정합니다. 필요에 따라 값 변경 가능합니다. */
+      }
+
+      .sidebar-toggle::before {
+        content: '\2630'; /* 햄버거 메뉴 아이콘으로 간단한 예를 들었습니다. */
+        position: absolute;
+        right: 10px; /* 오른쪽에서 10px 떨어진 위치에 아이콘을 배치합니다. */
+        top: 50%; /* 상위 요소의 중앙에 아이콘을 배치합니다. */
+        transform: translateY(-50%); /* 아이콘을 수직으로 중앙 정렬합니다. */
+      }
+
+      /* 스마트폰 화면에서만 적용되는 미디어 쿼리 */
+      @media (max-width: 768px) {
+        .main-sidebar {
+          top: 30px; /* 네비게이션 바의 높이에 따라 조절이 필요합니다. */
+        }
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          overflow-x: hidden; /* x축으로 넘치는 내용을 숨깁니다. */
+        }
+
+        .sidebar .sidebar-form .input-group {
+          display: flex;
+          align-items: center;
+          width: 78%; /* input-group의 최대 너비를 사이드바의 너비로 제한합니다. */
+          box-sizing: border-box; /* 패딩과 테두리를 요소의 전체 너비와 높이에 포함시킵니다. */
+        }
+      }
+    </style>
   </head>
-  <body class="skin-blue">
+  <body class="skin-green">
     <div class="wrapper">
       <header class="main-header">
         <!-- Logo -->
@@ -82,7 +145,6 @@
       </header>
       <!-- Header 끝 -->
 
-      <!-- Left side column. contains the logo and sidebar -->
       <aside class="main-sidebar">
         <!-- sidebar: style can be found in sidebar.less -->
         <section class="sidebar">
@@ -197,6 +259,7 @@
         </section>
         <!-- /.sidebar 끝 -->
       </aside>
+      <!--                   네비 다 복사 가능                      -->
 
       <!-- Right side column. Contains the navbar and content of the page -->
       <div class="content-wrapper">
@@ -355,26 +418,29 @@
       </div>
       <!-- /.content-wrapper -->
       <footer class="main-footer">
+        <div class="btn-container">
+          <!-- 이 div가 추가됨 -->
+          <a
+            href="https://github.com/hodu31/LastProject_web"
+            class="btn btn-social bg-navy btn-flat"
+          >
+            <i class="fa fa-github"></i> Go GitHub
+          </a>
+          <a
+            href="https://www.instagram.com/buy_so_team3/"
+            class="btn btn-social bg-maroon btn-flat"
+          >
+            <i class="fa fa-instagram"></i> Go Instagram
+          </a>
+        </div>
+        <strong>2023/05 ~ 2023/11 ::</strong>
+        <b style="font-size: 15px"> 한국품질재단 - 빅데이터 분석가 양성과정</b>.
+        The Last Project.
         <div class="pull-right hidden-xs">
           <a href="https://www.notion.so/_-3-53834d1bc4914d7e98f64b0ced5c7916"
             ><b>Team 3 - Notion</b></a
           >
         </div>
-        <a
-          href="https://github.com/hodu31/LastProject_web"
-          class="btn btn-social bg-navy btn-flat"
-        >
-          <i class="fa fa-github"></i> Go GitHub
-        </a>
-        <a
-          href="https://www.instagram.com/buy_so_team3/"
-          class="btn btn-social bg-maroon btn-flat"
-        >
-          <i class="fa fa-instagram"></i> Go Instagram
-        </a>
-        <strong>2023/05 ~ 2023/11 ::</strong>
-        <b style="font-size: 15px"> 한국품질재단 - 빅데이터 분석가 양성과정</b>.
-        The Last Project.
       </footer>
     </div>
     <!-- ./wrapper -->
@@ -401,11 +467,6 @@
     <!-- AdminLTE App -->
     <script
       src="/static/mainapp/dist/js/app.min.js"
-      type="text/javascript"
-    ></script>
-    <!-- AdminLTE for demo purposes -->
-    <script
-      src="/static/mainapp/dist/js/demo.js"
       type="text/javascript"
     ></script>
     <!-- fullCalendar 2.2.5 -->

@@ -38,6 +38,13 @@
         background-repeat: no-repeat;
         background-size: cover; /* 이미지를 화면 크기에 맞게 조절 */
       }
+
+      /* 화면 크기가 768px 이하일 때 적용될 스타일 */
+      @media (max-width: 768px) {
+        .register-page {
+          background-image: url('/static/mainapp/dist/img/buyso-mobile.jpg');
+        }
+      }
     </style>
   </head>
   <body class="register-page">

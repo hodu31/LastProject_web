@@ -38,6 +38,30 @@
         background-repeat: no-repeat;
         background-size: cover; /* 이미지를 화면 크기에 맞게 조절 */
       }
+      /* 화면 크기가 768px 이하일 때 적용될 스타일 */
+      @media (max-width: 768px) {
+          .login-page {
+              background-image: url('/static/mainapp/dist/img/buyso-mobile.jpg');
+          }
+}
+
+    @media (max-width: 768px) {
+        .login-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* viewport height */
+        }
+        .login-box {
+            margin: 0;
+        }
+    }
+    .login-box-body > div, .login-box-body form {
+        width: 100%; /* 로그인 박스 바디 내부의 모든 div와 form의 너비를 100%로 설정합니다. */
+    }
+    .row {
+        justify-content: center; /* row 내부의 아이템들을 중앙에 위치시킵니다. */
+    }
     </style>
   </head>
   <body class="login-page">
