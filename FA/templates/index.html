@@ -148,6 +148,7 @@
     }
 
 </style>
+
 </head>
 <!--                   네비 다 복사 가능                      -->
   <body class="skin-blue">
@@ -365,7 +366,8 @@
                 </ul>
                 <div class="tab-content no-padding" style="width: 100%; height: 100%; border: 0;">
                     <!-- 카메라 스트림 표시를 위한 video 태그 -->
-                    <video id="cameraStream" src="http://192.168.203.167:4747/mjpegfeed" autoplay muted></video>
+                    <video id="cameraStream" width="640" height="480" autoplay muted></video>
+
                 </div>
             </div>
             <br/>
@@ -460,8 +462,6 @@
               <a href="https://www.notion.so/_-3-53834d1bc4914d7e98f64b0ced5c7916"><b>Team 3 - Notion</b></a>
           </div>
       </footer>
-
-    
     </div><!-- ./wrapper -->
     <!-- jQuery 2.1.3 -->
     <script src="/static/mainapp/plugins/jQuery/jQuery-2.1.3.min.js"></script>
@@ -516,75 +516,96 @@
             });
     </script>
 
+<!-- 텐서플로우 라이브러리 불러오기 -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 
-    <!-- 테스트 텐서플로우 불러오기 -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
-
-    <script>
-    function notifyObjectDetected(message) {
-    alert(message);
-}
-
-    // 모델 로드
-    let net;
-    async function loadModel() {
-        console.log('Loading model...');
-        net = await cocoSsd.load();
-        console.log('Model loaded.');
-        
-        // 모델 로드 후 비디오에 대한 예측 시작
-        detectFromVideoFrame();
-    }
-
-async function detectFromVideoFrame() {
-    const video = document.getElementById('cameraStream');
-
-    // 비디오가 재생되고 있는지 확인
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        try {
-            const predictions = await net.detect(video);
-            
-            for (let i = 0; i < predictions.length; i++) {
-                if (predictions[i].class === 'person') {
-                    notifyObjectDetected("사람");
-                }
-            }
-            
-        } catch (error) {
-            console.log('Error:', error);
-        }
-    }
-
-    // 재귀 호출로 계속 탐지
-    requestAnimationFrame(() => {
-        detectFromVideoFrame(video);
-    });
-}
-let lastNotifiedTime = 0;
-
-function notifyObjectDetected(message) {
-    const now = Date.now();
-    const timeSinceLastNotification = now - lastNotifiedTime;
-
-    // 10초 이내에는 알람을 다시 표시하지 않음
-    if (timeSinceLastNotification > 10000 || lastNotifiedTime === 0) {
-        alert(message);
-        lastNotifiedTime = now;
-    }
-}
-
-    // 모델 로드 시작
-    loadModel();
-    
+<!-- 드루이드 캠 스크립트 -->
+<script>
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            let video = document.getElementById('cameraStream');
+            video.srcObject = stream;
+        })
+        .catch(error => {
+            console.error("Error accessing the camera", error);
+        });
 </script>
 
+<!-- 객체 감지 및 알림 스크립트 -->
 <script>
-    // 스트림 로드가 완료될 때까지 대기합니다.
-    let video = document.getElementById('cameraStream');
-    video.onloadedmetadata = function() {
-        console.log("Stream loaded");
-    };
+  Notification.requestPermission().then(function(permission) {
+    if (permission === 'granted') {
+        // 알림 권한이 부여됐을 때 실행되는 코드
+    }
+});
+
+    let lastNotifiedTime = 0;
+
+    async function loadModel() {
+        console.log('Loading model...');
+        const net = await cocoSsd.load();
+        console.log('Model loaded.');
+
+        const video = document.getElementById('cameraStream');
+        video.onloadedmetadata = function() {
+            video.play();
+            detectFromVideoFrame(net);
+        };
+    }
+
+    async function detectFromVideoFrame(net) {
+        const video = document.getElementById('cameraStream');
+
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            try {
+                const predictions = await net.detect(video);
+
+                for (let i = 0; i < predictions.length; i++) {
+                    if (predictions[i].class === 'person') {
+                        // 사람이 감지되었을 때 알림을 표시
+                        const currentTime = Date.now();
+                        if (currentTime - lastNotifiedTime > 10000) {
+                            const notification = new Notification("바이소", {
+                                body: '사람이 감지 되었습니다.',
+                                icon: '/static/mainapp/dist/img/위험.png' // 이미지 파일의 경로 또는 URL을 지정합니다.
+                            });
+                            lastNotifiedTime = currentTime;
+                        }
+
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        requestAnimationFrame(() => {
+            detectFromVideoFrame(net);
+        });
+    }
+
+    // 페이지 로드 시 모델 로드 함수 호출
+    window.addEventListener('DOMContentLoaded', (event) => {
+        loadModel();
+    });
+</script>
+
+
+<script>
+document.getElementById("requestPermissionButton").addEventListener("click", function() {
+    Notification.requestPermission().then(function(permission) {
+        if (permission === "granted") {
+            // 사용자가 권한을 허용한 경우
+            alert("알림 권한이 허용되었습니다.");
+        } else if (permission === "denied") {
+            // 사용자가 권한을 거부한 경우
+            alert("알림 권한이 거부되었습니다.");
+        } else {
+            // 사용자가 알림 권한을 임시로 차단한 경우 또는 브라우저에서 지원하지 않는 경우
+            alert("알림 권한을 설정할 수 없습니다.");
+        }
+    });
+});
 </script>
   </body>
 </html>

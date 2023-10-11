@@ -8,6 +8,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from databases import Database
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
+from py_vapid import Vapid
+from pywebpush import webpush, WebPushException
+import requests
 
 
 ### 서버 실행 코드: uvicorn main:app --reload ###
@@ -15,9 +18,16 @@ from fastapi.staticfiles import StaticFiles
 # 데이터베이스 연결 URL 설정
 DATABASE_URL = "mysql+pymysql://root:0000@127.0.0.1:3306/security"
 
+
 # 데이터베이스 객체 생성
 database = Database(DATABASE_URL)
 metadata = MetaData()
+# VAPID 설정
+#VAPID_PRIVATE_KEY = "cbjV5JCGvpYPoAj0kpMqCIBR8f_k6Z74cTE"
+#VAPID_PUBLIC_KEY = "BPwPP1HTMHD9YjUT9ZCYXyNuv3rt5Ytz8cftZQHWBOBolFBIWDRSbansTNeV2mBhgUsVQsYfZ0M-hitkcCZu2v0"
+#VAPID_CLAIMS = {
+#    "sub": "mailto:yulha042812@gmail.com"
+#}
 
 # FastAPI 앱 객체 생성
 app = FastAPI()
@@ -49,6 +59,7 @@ class User(Base):
     sec_add = Column(String)
     sec_hp = Column(String)
     sec_area = Column(String)
+
 
 
 # 루트 경로에 대한 핸들러
