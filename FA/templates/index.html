@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>BuySo | Dashboard</title>
+    <title>BuySo | Shop</title>
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -170,7 +170,7 @@
                   <li class="dropdown user user-menu">
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                           <img src="/static/mainapp/dist/img/cat5.jpg" class="user-image" alt="User Image"/> <!-- 원래 이미지 유지 -->
-                          <span class="hidden-xs">({{ user.sec_area }}) {{ user.sec_nm }}님 환영합니다.</span>
+                          <span class="hidden-xs">({{ user.sec_bir }}) {{ user.sec_nm }}님 환영합니다.</span>
                       </a>
                       <ul class="dropdown-menu">
                           <li><a href="/logout/" class="dropdown-item">로그아웃</a></li>
@@ -280,8 +280,8 @@
             <li><a href="/static/mainapp/documentation/index.html"><i class="fa fa-book"></i> Documentation</a></li>
             <li class="header">Area</li>
             <li><a href="/"><i class="fa fa-circle-o text-info"></i> 매장 이상감지</a></li>
-            <li><a href="/index_2/"><i class="fa fa-circle-o text-warning"></i> 병원 이상감지</a></li>
-            <li><a href="/index_3/"><i class="fa fa-circle-o text-danger"></i> 가정 이상감지</a></li>
+            <li><a href="/index2/"><i class="fa fa-circle-o text-warning"></i> 병원 이상감지</a></li>
+            <li><a href="/index3"><i class="fa fa-circle-o text-danger"></i> 가정 이상감지</a></li>
           </ul>
         </section>
         <!-- /.sidebar 끝 -->
@@ -359,15 +359,17 @@
           <div class="row">
             <!-- Left col -->
             <section class="col-lg-7 connectedSortable">
-              <div class="nav-tabs-custom" style="width: 100%; height: 520px;">
+            <div class="nav-tabs-custom" style="width: 100%; height: 520px;">
                 <!-- Tabs within a box -->
                 <ul class="nav nav-tabs pull-right">
-                    <li class="pull-left header"><i class="fa fa-inbox"></i> 실시간 CCTV </li>
+                    <li class="pull-left header"><i class="fa fa-camera"></i> 실시간 CCTV </li>
+                              <div class="box-tools pull-camera" style="margin-left: 72%;">
+                                <button class="btn btn-block btn-default" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                              </div>
                 </ul>
                 <div class="tab-content no-padding" style="width: 100%; height: 100%; border: 0;">
                     <!-- 카메라 스트림 표시를 위한 video 태그 -->
-                    <video id="cameraStream" width="640" height="480" autoplay muted></video>
-
+                    <video id="cameraStream" width="100%" height="100%" autoplay muted></video>
                 </div>
             </div>
             <br/>
@@ -395,7 +397,7 @@
               <!-- solid sales graph -->
               <div class="box box-solid bg-teal-gradient">
                 <div class="box-header">
-                  <i class="fa fa-th"></i>
+                  <i class="fa fa-bar-chart-o"></i>
                   <h3 class="box-title">금일 방문객 수</h3>
                   <div class="box-tools pull-right">
                     <button class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i></button>
@@ -606,6 +608,27 @@ document.getElementById("requestPermissionButton").addEventListener("click", fun
         }
     });
 });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const collapseButton = document.querySelector('button[data-widget="collapse"]');
+    const content = document.querySelector('.tab-content');
+    const icon = collapseButton.querySelector('i.fa');
+
+    collapseButton.addEventListener('click', function() {
+        if (content.style.display !== 'none') {
+            content.style.display = 'none';
+            icon.classList.remove('fa-minus');
+            icon.classList.add('fa-plus');
+        } else {
+            content.style.display = 'block';
+            icon.classList.remove('fa-plus');
+            icon.classList.add('fa-minus');
+        }
+    });
+});
+
 </script>
   </body>
 </html>

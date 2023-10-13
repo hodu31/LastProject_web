@@ -3,14 +3,16 @@ from fastapi import FastAPI, Depends, HTTPException, Form, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.requests import Request
-from sqlalchemy import create_engine, Column, String, MetaData, select
+from sqlalchemy import create_engine, Column, String, MetaData, select, Table, Integer, DateTime, ForeignKey, TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
 from databases import Database
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from py_vapid import Vapid
 from pywebpush import webpush, WebPushException
-import requests
+from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.mysql import MEDIUMBLOB
+from sqlalchemy.sql import func
 
 
 ### 서버 실행 코드: uvicorn main:app --reload ###
@@ -49,7 +51,7 @@ templates = Jinja2Templates(directory="templates")
 # SQLAlchemy의 기본 클래스 생성
 Base = declarative_base()
 
-# User 모델 정의
+# security User 모델 정의
 class User(Base):
     __tablename__ = "security"
     sec_id = Column(String, primary_key=True, index=True)
@@ -59,6 +61,88 @@ class User(Base):
     sec_add = Column(String)
     sec_hp = Column(String)
     sec_area = Column(String)
+    
+# ls user 모델 정의
+class LastproUser(Base):
+    __tablename__ = "LASTPRO_USERS"
+    USER_ID = Column(String(40), primary_key=True, index=True)
+    USER_PW = Column(String(40))
+    USER_NM = Column(String(15))
+    USER_BIR = Column(String(20))
+    USER_ADD = Column(String(30))
+    USER_HP = Column(String(20))
+    USER_AREA = Column(String(30))
+    
+# ls shop 모델 정의
+class LastproShop(Base):
+    __tablename__ = "LASTPRO_SHOP"
+    SHOP_ID = Column(String(40), primary_key=True, index=True)
+    USER_ID = Column(String(40), ForeignKey("LASTPRO_USERS.USER_ID"), index=True)
+   
+# ls visit 모델 정의
+class LastproVisit(Base):
+    __tablename__ = "LASTPRO_VISIT"
+    SHOP_ID = Column(String(40), ForeignKey("LASTPRO_SHOPS.SHOP_ID"), index=True)
+    USER_ID = Column(String(40), ForeignKey("LASTPRO_USERS.USER_ID"), index=True)
+    V_ID = Column(String(50), primary_key=True, index=True)
+    V_ENTIME = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+    V_EXTIME = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+    V_CAM = Column(MEDIUMBLOB)
+    
+    
+# ls dancode 모델 정의
+class LastproDanCode(Base):
+    __tablename__ = "LASTPRO_DAN_CODE"
+    DAN_CODE = Column(Integer, primary_key=True, index=True)
+    DAN_CODE_KOR = Column(String(50))
+    
+# ls dan 모델 정의
+class LastproDan(Base):
+    __tablename__ = "LASTPRO_DAN"
+    DAN_V_ID = Column(String(50), primary_key=True, index=True)
+    SHOP_ID = Column(String(40), ForeignKey("LASTPRO_SHOPS.SHOP_ID"), index=True)
+    USER_ID = Column(String(40), ForeignKey("LASTPRO_USERS.USER_ID"), index=True)
+    DAN_CODE = Column(Integer, ForeignKey("LASTPRO_DAN_CODE.DAN_CODE"), index=True)
+    DAN_TIME = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+
+    
+    
+### 반복문의 경우   
+@app.get("/{page}", response_class=HTMLResponse)
+async def get_users(request: Request, page: str):
+    # 사용자 정보 가져오기
+    user_query = select(LastproUser)
+    users = await database.fetch_all(user_query)
+
+    # 상점 정보 가져오기
+    shop_query = select(LastproShop)
+    shops = await database.fetch_all(shop_query)
+    
+    # 방문자 정보 가져오기
+    visit_query = select(LastproVisit)
+    visits = await database.fetch_all(visit_query)
+    
+    # 행동 코드 정보 가져오기
+    dancode_query = select(LastproDanCode)
+    dancodes = await database.fetch_all(dancode_query)
+    
+    # 행동 정보 가져오기
+    dan_query = select(LastproDan)
+    dans = await database.fetch_all(dan_query)
+
+    return templates.TemplateResponse(
+        f"{page}.html",
+        {"request": request, "users": users, "shops": shops, "visits": visits, "dancodes":dancodes, "dans":dans}
+    )
+
+
+### 하나씩 fetch_one
+# @app.get("/{page}", response_class=HTMLResponse)
+# async def get_users(request: Request, page: str):
+#     query = select(LastproUser)
+#     user = await database.fetch_one(query)
+#     return templates.TemplateResponse(f"{page}.html", {"request": request, "user": user})
+
 
 
 
@@ -77,6 +161,20 @@ async def favicon():
     return {}
 
 
+# index3 경로에 대한 핸들러
+@app.get("/index3", response_class=HTMLResponse)
+async def index3_page(request: Request):
+    user_id = request.session.get("user_id")
+    user = None
+    if user_id:
+        query = select(User).where(User.sec_id == user_id)
+        user = await database.fetch_one(query)
+    return templates.TemplateResponse("index3.html", {"request": request, "user": user})
+
+@app.get("/favicon.ico")
+async def favicon():
+    return {}
+
 # 모든 페이지에 대한 핸들러
 @app.get("/{page}", response_class=HTMLResponse)
 async def read_page(request: Request, page: str):
@@ -92,6 +190,7 @@ async def read_page(request: Request, page: str):
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
+
 
 # 가입 페이지에 대한 핸들러
 @app.get("/signup", response_class=HTMLResponse)
