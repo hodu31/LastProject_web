@@ -21,12 +21,6 @@ DATABASE_URL = "mysql+pymysql://root:0000@127.0.0.1:3306/security"
 # 데이터베이스 객체 생성
 database = Database(DATABASE_URL)
 metadata = MetaData()
-# VAPID 설정
-#VAPID_PRIVATE_KEY = "cbjV5JCGvpYPoAj0kpMqCIBR8f_k6Z74cTE"
-#VAPID_PUBLIC_KEY = "BPwPP1HTMHD9YjUT9ZCYXyNuv3rt5Ytz8cftZQHWBOBolFBIWDRSbansTNeV2mBhgUsVQsYfZ0M-hitkcCZu2v0"
-#VAPID_CLAIMS = {
-#    "sub": "mailto:yulha042812@gmail.com"
-#}
 
 # FastAPI 앱 객체 생성
 app = FastAPI()
@@ -38,12 +32,14 @@ app.mount("/css", StaticFiles(directory="css"), name="css")
 app.mount("/js", StaticFiles(directory="js"), name="js")
 app.mount("/templates", StaticFiles(directory="templates"), name="templates")
 
-#########################################################
+
 # 세션 미들웨어 추가 (사용자 세션 관리를 위함)
 app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
 
 # Jinja2 템플릿 설정
 templates = Jinja2Templates(directory="templates")
+# Jinja2 템플릿 설정
+templates2 = Jinja2Templates(directory="static/mainapp/aboutpage")
 
 # SQLAlchemy의 기본 클래스 생성
 Base = declarative_base()
@@ -141,18 +137,18 @@ async def read_page(request: Request, page: str):
 
 
 
-### 하나씩 fetch_one
-# @app.get("/{page}", response_class=HTMLResponse)
-# async def get_users(request: Request, page: str):
-#     query = select(LastproUser)
-#     user = await database.fetch_one(query)
-#     return templates.TemplateResponse(f"{page}.html", {"request": request, "user": user})
-
-
-
-
-# 루트 경로에 대한 핸들러
+# index1 경로
 @app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    user_id = request.session.get("user_id")
+    user = None
+    if user_id:
+        query = select(LastproUser).where(LastproUser.USER_ID == user_id)
+        user = await database.fetch_one(query)
+    return templates2.TemplateResponse("aboutus.html", {"request": request, "user": user})
+
+# index1 경로
+@app.get("/index", response_class=HTMLResponse)
 async def read_root(request: Request):
     user_id = request.session.get("user_id")
     user = None
@@ -172,11 +168,6 @@ async def index3_page(request: Request):
         user = await database.fetch_one(query)
     return templates.TemplateResponse("index3.html", {"request": request, "user": user})
 
-
-# 로그인 페이지에 대한 핸들러
-@app.get("/login", response_class=HTMLResponse)
-async def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
 
 
 # 가입 페이지에 대한 핸들러
