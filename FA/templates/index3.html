@@ -170,7 +170,7 @@
                   <li class="dropdown user user-menu">
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                           <img src="/static/mainapp/dist/img/cat5.jpg" class="user-image" alt="User Image"/> <!-- 원래 이미지 유지 -->
-                          <span class="hidden-xs">({{ user.sec_bir }}) {{ user.sec_nm }}님 환영합니다.</span>
+                          <span class="hidden-xs">({{ user.USER_BIR }}) {{ user.USER_NM }}님 환영합니다.</span>
                       </a>
                       <ul class="dropdown-menu">
                           <li><a href="/logout/" class="dropdown-item">로그아웃</a></li>
@@ -219,7 +219,7 @@
             <div class="pull-left info">
                 {% if user %}
                     <!-- 로그인한 사용자의 이름 -->
-                    <p>{{ user.sec_nm }}</p>
+                    <p>{{ user.USER_NM }}</p>
                     <a href="/"><i class="fa fa-circle text-success"></i> Online</a>
                 {% else %}
                     <!-- 게스트 -->

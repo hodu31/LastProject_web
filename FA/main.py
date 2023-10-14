@@ -1,16 +1,13 @@
 ### 필요 라이브러리 등
-from fastapi import FastAPI, Depends, HTTPException, Form, Request
+from fastapi import FastAPI, HTTPException, Form, Request
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.requests import Request
-from sqlalchemy import create_engine, Column, String, MetaData, select, Table, Integer, DateTime, ForeignKey, TIMESTAMP
+from sqlalchemy import  Column, String, MetaData, select, Integer, ForeignKey, TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
 from databases import Database
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
-from py_vapid import Vapid
-from pywebpush import webpush, WebPushException
-from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.mysql import MEDIUMBLOB
 from sqlalchemy.sql import func
 
@@ -51,16 +48,6 @@ templates = Jinja2Templates(directory="templates")
 # SQLAlchemy의 기본 클래스 생성
 Base = declarative_base()
 
-# security User 모델 정의
-class User(Base):
-    __tablename__ = "security"
-    sec_id = Column(String, primary_key=True, index=True)
-    sec_pw = Column(String)
-    sec_nm = Column(String)
-    sec_bir = Column(String)
-    sec_add = Column(String)
-    sec_hp = Column(String)
-    sec_area = Column(String)
     
 # ls user 모델 정의
 class LastproUser(Base):
@@ -82,7 +69,7 @@ class LastproShop(Base):
 # ls visit 모델 정의
 class LastproVisit(Base):
     __tablename__ = "LASTPRO_VISIT"
-    SHOP_ID = Column(String(40), ForeignKey("LASTPRO_SHOPS.SHOP_ID"), index=True)
+    SHOP_ID = Column(String(40), ForeignKey("LASTPRO_SHOP.SHOP_ID"), index=True)
     USER_ID = Column(String(40), ForeignKey("LASTPRO_USERS.USER_ID"), index=True)
     V_ID = Column(String(50), primary_key=True, index=True)
     V_ENTIME = Column(TIMESTAMP, server_default=func.now(), nullable=False)
@@ -100,16 +87,15 @@ class LastproDanCode(Base):
 class LastproDan(Base):
     __tablename__ = "LASTPRO_DAN"
     DAN_V_ID = Column(String(50), primary_key=True, index=True)
-    SHOP_ID = Column(String(40), ForeignKey("LASTPRO_SHOPS.SHOP_ID"), index=True)
+    SHOP_ID = Column(String(40), ForeignKey("LASTPRO_SHOP.SHOP_ID"), index=True)
     USER_ID = Column(String(40), ForeignKey("LASTPRO_USERS.USER_ID"), index=True)
     DAN_CODE = Column(Integer, ForeignKey("LASTPRO_DAN_CODE.DAN_CODE"), index=True)
     DAN_TIME = Column(TIMESTAMP, server_default=func.now(), nullable=False)
 
     
     
-### 반복문의 경우   
-@app.get("/{page}", response_class=HTMLResponse)
-async def get_users(request: Request, page: str):
+# 공통 로직을 위한 비동기 함수
+async def get_common_data():
     # 사용자 정보 가져오기
     user_query = select(LastproUser)
     users = await database.fetch_all(user_query)
@@ -117,23 +103,42 @@ async def get_users(request: Request, page: str):
     # 상점 정보 가져오기
     shop_query = select(LastproShop)
     shops = await database.fetch_all(shop_query)
-    
+
     # 방문자 정보 가져오기
     visit_query = select(LastproVisit)
     visits = await database.fetch_all(visit_query)
-    
+
     # 행동 코드 정보 가져오기
     dancode_query = select(LastproDanCode)
     dancodes = await database.fetch_all(dancode_query)
-    
+
     # 행동 정보 가져오기
     dan_query = select(LastproDan)
     dans = await database.fetch_all(dan_query)
+  
+    return users, shops, visits, dancodes, dans
 
-    return templates.TemplateResponse(
-        f"{page}.html",
-        {"request": request, "users": users, "shops": shops, "visits": visits, "dancodes":dancodes, "dans":dans}
-    )
+# 모든 페이지에 대한 핸들러
+@app.get("/{page}", response_class=HTMLResponse)
+async def read_page(request: Request, page: str):
+    if page == "favicon.ico":
+        return Response(status_code=204)  # No Content
+    else:
+        # 세션에서 로그인 정보 가져오기
+        user_id = request.session.get("user_id")
+        user = None
+        if user_id:
+            query = select(LastproUser).where(LastproUser.USER_ID == user_id)
+            user = await database.fetch_one(query)
+      
+        # 공통 데이터 가져오기
+        users, shops, visits, dancodes, dans = await get_common_data()
+
+        return templates.TemplateResponse(
+            f"{page}.html", 
+            {"request": request, "user": user, "users": users, "shops": shops, "visits": visits, "dancodes": dancodes, "dans": dans}
+        )
+
 
 
 ### 하나씩 fetch_one
@@ -152,13 +157,9 @@ async def read_root(request: Request):
     user_id = request.session.get("user_id")
     user = None
     if user_id:
-        query = select(User).where(User.sec_id == user_id)
+        query = select(LastproUser).where(LastproUser.USER_ID == user_id)
         user = await database.fetch_one(query)
     return templates.TemplateResponse("index.html", {"request": request, "user": user})
-
-@app.get("/favicon.ico")
-async def favicon():
-    return {}
 
 
 # index3 경로에 대한 핸들러
@@ -167,24 +168,10 @@ async def index3_page(request: Request):
     user_id = request.session.get("user_id")
     user = None
     if user_id:
-        query = select(User).where(User.sec_id == user_id)
+        query = select(LastproUser).where(LastproUser.USER_ID == user_id)
         user = await database.fetch_one(query)
     return templates.TemplateResponse("index3.html", {"request": request, "user": user})
 
-@app.get("/favicon.ico")
-async def favicon():
-    return {}
-
-# 모든 페이지에 대한 핸들러
-@app.get("/{page}", response_class=HTMLResponse)
-async def read_page(request: Request, page: str):
-    user_id = request.session.get("user_id")
-    user = None
-    if user_id:
-        query = select(User).where(User.sec_id == user_id)
-        user = await database.fetch_one(query)
-    
-    return templates.TemplateResponse(f"{page}.html", {"request": request, "user": user})
 
 # 로그인 페이지에 대한 핸들러
 @app.get("/login", response_class=HTMLResponse)
@@ -198,15 +185,15 @@ async def signup_page(request: Request):
     return templates.TemplateResponse("signup.html", {"request": request})
 
 @app.post("/login/")
-async def login(request: Request, sec_id: str = Form(...), sec_pw: str = Form(...)):
-    query = select(User).where(User.sec_id == sec_id)
+async def login(request: Request, USER_ID: str = Form(...), USER_PW: str = Form(...)):
+    query = select(LastproUser).where(LastproUser.USER_ID == USER_ID)
     user = await database.fetch_one(query)
     if not user:
         return templates.TemplateResponse("login.html", {"request": request, "error": "입력한 ID 정보가 없습니다."})
-    if user.sec_pw != sec_pw:
+    if user.USER_PW != USER_PW:
         return templates.TemplateResponse("login.html", {"request": request, "error": "패스워드가 잘못되었습니다."})
     
-    request.session["user_id"] = sec_id
+    request.session["user_id"] = USER_ID
     return RedirectResponse(url="/", status_code=303)
 
 
@@ -232,29 +219,29 @@ async def shutdown():
 @app.post("/signup")
 async def signup(
     request: Request,
-    sec_id: str = Form(...),
-    sec_pw: str = Form(...),
-    sec_nm: str = Form(...),
-    sec_bir: str = Form(...),
-    sec_hp: str = Form(...),
-    sec_add: str = Form(...),
-    sec_area: str = Form(...)
+    USER_ID: str = Form(...),
+    USER_PW: str = Form(...),
+    USER_NM: str = Form(...),
+    USER_BIR: str = Form(...),
+    USER_ADD: str = Form(...),
+    USER_HP: str = Form(...),
+    USER_AREA: str = Form(...)
 ):
     # 이미 존재하는 사용자인지 확인
-    query = select(User).where(User.sec_id == sec_id)
+    query = select(LastproUser).where(LastproUser.USER_ID == USER_ID)
     user = await database.fetch_one(query)
     if user:
         raise HTTPException(status_code=400, detail="User ID already exists")
 
     # 사용자 정보 저장
-    query = User.__table__.insert().values(
-        sec_id=sec_id,
-        sec_pw=sec_pw,
-        sec_nm=sec_nm,
-        sec_bir=sec_bir,
-        sec_hp=sec_hp,
-        sec_add=sec_add,
-        sec_area=sec_area
+    query = LastproUser.__table__.insert().values(
+        USER_ID=USER_ID,
+        USER_PW=USER_PW,
+        USER_NM=USER_NM,
+        USER_BIR=USER_BIR,
+        USER_ADD=USER_ADD,
+        USER_HP=USER_HP,
+        USER_AREA=USER_AREA
     )
     await database.execute(query)
 
