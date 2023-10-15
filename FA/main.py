@@ -31,6 +31,7 @@ app.mount("/bootstrap", StaticFiles(directory="bootstrap"), name="bootstrap")
 app.mount("/css", StaticFiles(directory="css"), name="css")
 app.mount("/js", StaticFiles(directory="js"), name="js")
 app.mount("/templates", StaticFiles(directory="templates"), name="templates")
+app.mount("/static/mainapp/aboutpage", StaticFiles(directory="static/mainapp/aboutpage"), name="aboutpage")
 
 
 # 세션 미들웨어 추가 (사용자 세션 관리를 위함)
@@ -38,8 +39,6 @@ app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
 
 # Jinja2 템플릿 설정
 templates = Jinja2Templates(directory="templates")
-# Jinja2 템플릿 설정
-templates2 = Jinja2Templates(directory="static/mainapp/aboutpage")
 
 # SQLAlchemy의 기본 클래스 생성
 Base = declarative_base()
@@ -136,18 +135,12 @@ async def read_page(request: Request, page: str):
         )
 
 
-
-# index1 경로
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    user_id = request.session.get("user_id")
-    user = None
-    if user_id:
-        query = select(LastproUser).where(LastproUser.USER_ID == user_id)
-        user = await database.fetch_one(query)
-    return templates2.TemplateResponse("aboutus.html", {"request": request, "user": user})
+    return RedirectResponse(url="/static/mainapp/aboutpage/aboutus.html")
 
-# index1 경로
+
+# index 경로에 대한 핸들러
 @app.get("/index", response_class=HTMLResponse)
 async def read_root(request: Request):
     user_id = request.session.get("user_id")
@@ -185,7 +178,7 @@ async def login(request: Request, USER_ID: str = Form(...), USER_PW: str = Form(
         return templates.TemplateResponse("login.html", {"request": request, "error": "패스워드가 잘못되었습니다."})
     
     request.session["user_id"] = USER_ID
-    return RedirectResponse(url="/", status_code=303)
+    return RedirectResponse(url="/index", status_code=303)
 
 
 

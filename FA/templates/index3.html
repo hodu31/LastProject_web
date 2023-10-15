@@ -220,11 +220,11 @@
                 {% if user %}
                     <!-- 로그인한 사용자의 이름 -->
                     <p>{{ user.USER_NM }}</p>
-                    <a href="/"><i class="fa fa-circle text-success"></i> Online</a>
+                    <a href="/index3"><i class="fa fa-circle text-success"></i> Online</a>
                 {% else %}
                     <!-- 게스트 -->
                     <p>Guest</p>
-                    <a href="/"><i class="fa fa-circle text-danger"></i> Offline</a>
+                    <a href="/index3"><i class="fa fa-circle text-danger"></i> Offline</a>
                 {% endif %}
             </div>
         </div>
@@ -247,7 +247,7 @@
           <ul class="sidebar-menu">
             <li class="header">MAIN NAVIGATION</li>
             <li class="active treeview">
-              <a href="/">
+              <a href="/index3">
                 <i class="fa fa-dashboard"></i> <span>Dashboard</span>
               </a>
             </li>
@@ -257,29 +257,14 @@
                 <span>Charts</span>
               </a>
             </li>
-            <li class="treeview">
-              <a href="#">
-                <i class="fa fa-laptop"></i>
-                <span>UI Elements</span>
-                <i class="fa fa-angle-left pull-right"></i>
-              </a>
-              <ul class="treeview-menu">
-                <li><a href="/static/mainapp/pages/UI/general.html"><i class="fa fa-circle-o"></i> General</a></li>
-                <li><a href="/static/mainapp/pages/UI/icons.html"><i class="fa fa-circle-o"></i> Icons</a></li>
-                <li><a href="/static/mainapp/pages/UI/buttons.html"><i class="fa fa-circle-o"></i> Buttons</a></li>
-                <li><a href="/static/mainapp/pages/UI/sliders.html"><i class="fa fa-circle-o"></i> Sliders</a></li>
-                <li><a href="/static/mainapp/pages/UI/timeline.html"><i class="fa fa-circle-o"></i> Timeline</a></li>
-                <li><a href="/static/mainapp/pages/UI/modals.html"><i class="fa fa-circle-o"></i> Modals</a></li>
-              </ul>
-            </li>
             <li>
               <a href="/static/mainapp/pages/calendar.html">
                 <i class="fa fa-calendar"></i> <span>Calendar</span>
               </a>
 
-            <li><a href="/static/mainapp/documentation/index.html"><i class="fa fa-book"></i> Documentation</a></li>
+            <li><a href="/"><i class="fa fa-book"></i> About Us</a></li>
             <li class="header">Area</li>
-            <li><a href="/"><i class="fa fa-circle-o text-info"></i> 매장 이상감지</a></li>
+            <li><a href="/index"><i class="fa fa-circle-o text-info"></i> 매장 이상감지</a></li>
             <li><a href="/index2/"><i class="fa fa-circle-o text-warning"></i> 병원 이상감지</a></li>
             <li><a href="/index3/"><i class="fa fa-circle-o text-danger"></i> 가정 이상감지</a></li>
           </ul>
@@ -348,27 +333,33 @@
                 <div class="box-body border-radius-none">
                   <div class="chart" id="line-chart" style="height: 250px;">
                     <div class="input-group mb-3">
-                      <span class="input-group-text" id="basic-addon1">@</span>
-                      <input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+                      <span class="input-group-text" id="basic-addon1"><i class="fa fa-user"></i></span>
+                      <input type="text" class="form-control" placeholder="이름" aria-label="Username" aria-describedby="basic-addon1">
                     </div>
 
+                  <div class="chart" id="line-chart" style="height: 250px;">
                     <div class="input-group mb-3">
-                      <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="basic-addon2">
-                      <span class="input-group-text" id="basic-addon2">@example.com</span>
+                      <span class="input-group-text" id="basic-addon1"><i class="fa  fa-phone"></i></span>
+                      <input type="text" class="form-control" placeholder="010-0000-0000" aria-label="Username" aria-describedby="basic-addon1">
                     </div>
-                    <div class="form-group">
-                        <label> 핸드폰 번호 :</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text"><i class="fa fa-phone"></i></span>
-                            </div>
-                            <input
-                              type="text"
-                              class="form-control"
-                              placeholder="HP : 010-0000-0000"/>
-                            <span class="glyphicon glyphicon-user form-control-feedback"></span>
-                        </div><!-- /.input group -->
+                   <div class="chart" id="line-chart" style="height: 250px;">
+                    <div class="input-group mb-3">
+                      <span class="input-group-text" id="basic-addon1"><i class="fa  fa-phone"></i></span>
+                      <input type="text" class="form-control" placeholder="010-0000-0000" aria-label="Username" aria-describedby="basic-addon1">
+                    </div>
+
+                                      <div class="chart" id="line-chart" style="height: 250px;">
+                    <div class="input-group mb-3">
+                      <span class="input-group-text" id="basic-addon1"><i class="fa  fa-phone"></i></span>
+                      <input type="text" class="form-control" placeholder="010-0000-0000" aria-label="Username" aria-describedby="basic-addon1">
+                    </div>
+                                      <div class="chart" id="line-chart" style="height: 250px;">
+                    <div class="input-group mb-3">
+                      <span class="input-group-text" id="basic-addon1"><i class="fa  fa-phone"></i></span>
+                      <input type="text" class="form-control" placeholder="010-0000-0000" aria-label="Username" aria-describedby="basic-addon1">
+                    </div>
                     </div><!-- /.form group -->
+                    
 
 
                 </div><!-- /.box-body -->

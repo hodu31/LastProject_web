@@ -162,7 +162,7 @@
     <div class="wrapper">
       <header class="main-header">
         <!-- Logo -->
-        <a href="/" class="logo"><b>NotiCare-</b>Team 3</a>
+        <a href="/index" class="logo"><b>NotiCare-</b>Team 3</a>
         <!-- Header Navbar: style can be found in header.less -->
         <nav class="navbar navbar-static-top" role="navigation">
           <div>
@@ -227,11 +227,11 @@
                 {% if user %}
                     <!-- 로그인한 사용자의 이름 -->
                     <p>{{ user.USER_NM }}</p>
-                    <a href="/"><i class="fa fa-circle text-success"></i> Online</a>
+                    <a href="/index"><i class="fa fa-circle text-success"></i> Online</a>
                 {% else %}
                     <!-- 게스트 -->
                     <p>Guest</p>
-                    <a href="/"><i class="fa fa-circle text-danger"></i> Offline</a>
+                    <a href="/index"><i class="fa fa-circle text-danger"></i> Offline</a>
                 {% endif %}
             </div>
         </div>
@@ -254,7 +254,7 @@
           <ul class="sidebar-menu">
             <li class="header">MAIN NAVIGATION</li>
             <li class="active treeview">
-              <a href="/">
+              <a href="/index">
                 <i class="fa fa-dashboard"></i> <span>Dashboard</span>
               </a>
             </li>
@@ -271,7 +271,7 @@
 
             <li><a href="/"><i class="fa fa-book"></i> About Us</a></li>
             <li class="header">Area</li>
-            <li><a href="/"><i class="fa fa-circle-o text-info"></i> 매장 이상감지</a></li>
+            <li><a href="/index"><i class="fa fa-circle-o text-info"></i> 매장 이상감지</a></li>
             <li><a href="/index2/"><i class="fa fa-circle-o text-warning"></i> 병원 이상감지</a></li>
             <li><a href="/index3"><i class="fa fa-circle-o text-danger"></i> 가정 이상감지</a></li>
           </ul>
