@@ -78,16 +78,14 @@ class LastproDanCode(Base):
     DAN_CODE = Column(Integer, primary_key=True, index=True)
     DAN_CODE_KOR = Column(String(50))
     
-# ls dan 모델 정의
 class LastproDan(Base):
     __tablename__ = "LASTPRO_DAN"
     DAN_V_ID = Column(String(50), primary_key=True, index=True)
-    SHOP_ID = Column(String(40), ForeignKey("LASTPRO_SHOP.SHOP_ID"), index=True)
-    USER_ID = Column(String(40), ForeignKey("LASTPRO_USERS.USER_ID"), index=True)
-    DAN_CODE = Column(Integer, ForeignKey("LASTPRO_DAN_CODE.DAN_CODE"), index=True)
+    SHOP_ID = Column(String(40), ForeignKey("LASTPRO_SHOP.SHOP_ID"), primary_key=True, index=True)
+    USER_ID = Column(String(40), ForeignKey("LASTPRO_USERS.USER_ID"), primary_key=True, index=True)
+    DAN_CODE = Column(Integer, ForeignKey("LASTPRO_DAN_CODE.DAN_CODE"), primary_key=True, index=True)
     DAN_TIME = Column(TIMESTAMP, server_default=func.now(), nullable=False)
 
-    
     
 # 공통 로직을 위한 비동기 함수
 async def get_common_data():
@@ -129,10 +127,18 @@ async def read_page(request: Request, page: str):
         # 공통 데이터 가져오기
         users, shops, visits, dancodes, dans = await get_common_data()
 
+        # 방문자 수를 사용자 수와 동일한 길이로 출력
+        visitor_count = len(visits)  # 또는 다른 데이터를 사용하여 계산
+        
+        # 이상감지 수를 사용자 수와 동일한 길이로 출력
+        dan_count = len(dans)  # 또는 다른 데이터를 사용하여 계산
         return templates.TemplateResponse(
             f"{page}.html", 
-            {"request": request, "user": user, "users": users, "shops": shops, "visits": visits, "dancodes": dancodes, "dans": dans}
+            {"request": request, "user": user, "users": users, "shops": shops, "visits": visits, "dancodes": dancodes, "dans": dans,
+             "visitor_count":visitor_count, "dan_count":dan_count}
         )
+
+
 
 
 @app.get("/", response_class=HTMLResponse)

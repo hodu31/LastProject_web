@@ -23,7 +23,7 @@
 
     <!-- FontAwesome 4.3.0 -->
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
-    <!-- Ionicons 2.0.0 (s 추가)-->
+    <!-- Ionicons 2.0.0 -->
     <link href="https://code.ionicframework.com/ionicons/2.0.0/css/ionicons.min.css" rel="stylesheet" type="text/css" />    
     <!-- Theme style -->
     <link href="/static/mainapp/dist/css/AdminLTE.min.css" rel="stylesheet" type="text/css" />
@@ -299,7 +299,7 @@
               <!-- small box -->
               <div class="small-box bg-red">
                 <div class="inner">
-                  <h3>0</h3>
+                  <h3>{{ dan_count }}</h3>
                   <p>매장 내 이상 감지</p>
                 </div>
                 <div class="icon">
@@ -325,7 +325,7 @@
               <!-- small box -->
               <div class="small-box bg-yellow">
                 <div class="inner">
-                  <h3>0</h3>
+                  <h3>{{ visitor_count }}</h3>
                   <p>방문객 수</p>
                 </div>
                 <div class="icon">
@@ -360,13 +360,13 @@
                         <button id="lockButton" class="btn btn-outline-dark" data-widget="collapse" onclick="toggleLock()" >
                           <i id="lockIcon" class="fa fa-lock"></i>
                         </button>
-                        </ul>
+                  </ul>
                         <div class="tab-content no-padding" style="width: 100%; height: 100%; border: 0;">
                             <!-- 카메라 스트림 표시를 위한 video 태그 -->
                             <video id="cameraStream" width="100%" height="100%" autoplay muted></video>
                         </div>
-                </div>
-            <br/>
+              </div>
+                          <br/>
             <!-- Calendar -->
             <div class="box box-solid bg-green-gradient">
               <div class="box-header">
@@ -503,8 +503,7 @@
             console.error("Error accessing the camera", error);
         });
 </script>
-
-<!--객체 감지 및 알림 스크립트-->
+<!-- 임시                                    -->
 <script>
   let detectedLogs = [];  // 감지 로그를 저장할 배열
 
@@ -539,19 +538,12 @@
                   if (predictions[i].class === 'person') {
                       const currentTime = Date.now();
                       if (currentTime - lastNotifiedTime > 10000) {
-                          
-                          // 이 부분을 수정합니다.
-                          if ('serviceWorker' in navigator) {
-                            navigator.serviceWorker.ready.then(function(registration) {
-                              registration.showNotification("노티케어", {
-                                body: '사람이 감지 되었습니다.',
-                                icon: '/static/mainapp/dist/img/위험.png'
-                              });
-                            });
-                          }
-
+                          const notification = new Notification("노티케어", {
+                              body: '사람이 감지 되었습니다.',
+                              icon: '/static/mainapp/dist/img/위험.png'
+                          });
                           lastNotifiedTime = currentTime;
-                          
+
                           // 로그 저장
                           const timeString = new Date().toLocaleString();
                           detectedLogs.push(`${timeString} - 사람이 감지되었습니다.`);
@@ -573,14 +565,17 @@
       });
   }
 
-  document.getElementById('clearLogs').addEventListener('click', function() {
-    const boxBody = document.getElementById('customBoxBody');
-    boxBody.innerHTML = '';  // 모든 로그 지우기
-  });
+document.getElementById('clearLogs').addEventListener('click', function() {
+  const boxBody = document.getElementById('customBoxBody');
+  boxBody.innerHTML = '';  // 모든 로그 지우기
+});
 
-  loadModel();  // 모델 로딩 함수도 호출
+
+      loadModel();  // 모델 로딩 함수도 호출
+
 </script>
 
+<!-- 임시                                    -->
 
 
 <script>
@@ -611,14 +606,6 @@ function toggleLock() {
         lockIcon.classList.remove("fa-unlock");
         lockIcon.classList.add("fa-lock");
     }
-}
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/static/mainapp/service-worker.js').then(function(registration) {
-    console.log('Service Worker 등록 성공:', registration);
-  }).catch(function(error) {
-    console.log('Service Worker 등록 실패:', error);
-  });
 }
 
 </script>
