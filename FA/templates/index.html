@@ -360,13 +360,13 @@
                         <button id="lockButton" class="btn btn-outline-dark" data-widget="collapse" onclick="toggleLock()" >
                           <i id="lockIcon" class="fa fa-lock"></i>
                         </button>
-                  </ul>
+                        </ul>
                         <div class="tab-content no-padding" style="width: 100%; height: 100%; border: 0;">
                             <!-- 카메라 스트림 표시를 위한 video 태그 -->
                             <video id="cameraStream" width="100%" height="100%" autoplay muted></video>
                         </div>
-              </div>
-                          <br/>
+                </div>
+            <br/>
             <!-- Calendar -->
             <div class="box box-solid bg-green-gradient">
               <div class="box-header">
@@ -539,12 +539,19 @@
                   if (predictions[i].class === 'person') {
                       const currentTime = Date.now();
                       if (currentTime - lastNotifiedTime > 10000) {
-                          const notification = new Notification("노티케어", {
-                              body: '사람이 감지 되었습니다.',
-                              icon: '/static/mainapp/dist/img/위험.png'
-                          });
-                          lastNotifiedTime = currentTime;
+                          
+                          // 이 부분을 수정합니다.
+                          if ('serviceWorker' in navigator) {
+                            navigator.serviceWorker.ready.then(function(registration) {
+                              registration.showNotification("노티케어", {
+                                body: '사람이 감지 되었습니다.',
+                                icon: '/static/mainapp/dist/img/위험.png'
+                              });
+                            });
+                          }
 
+                          lastNotifiedTime = currentTime;
+                          
                           // 로그 저장
                           const timeString = new Date().toLocaleString();
                           detectedLogs.push(`${timeString} - 사람이 감지되었습니다.`);
@@ -566,15 +573,14 @@
       });
   }
 
-document.getElementById('clearLogs').addEventListener('click', function() {
-  const boxBody = document.getElementById('customBoxBody');
-  boxBody.innerHTML = '';  // 모든 로그 지우기
-});
+  document.getElementById('clearLogs').addEventListener('click', function() {
+    const boxBody = document.getElementById('customBoxBody');
+    boxBody.innerHTML = '';  // 모든 로그 지우기
+  });
 
-
-      loadModel();  // 모델 로딩 함수도 호출
-
+  loadModel();  // 모델 로딩 함수도 호출
 </script>
+
 
 
 <script>
@@ -605,6 +611,14 @@ function toggleLock() {
         lockIcon.classList.remove("fa-unlock");
         lockIcon.classList.add("fa-lock");
     }
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js').then(function(registration) {
+    console.log('Service Worker 등록 성공:', registration);
+  }).catch(function(error) {
+    console.log('Service Worker 등록 실패:', error);
+  });
 }
 
 </script>
