@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8">
     <title>NotiCare : Team 3 - main3</title>
+        <link
+      rel="icon"
+      href="/static/mainapp/img/noticarelogo.png"
+      type="image/x-icon"
+    />
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -378,7 +383,7 @@
               <a href="https://github.com/hodu31/LastProject_web" class="btn btn-social bg-navy btn-flat">
                   <i class="fa fa-github"></i> Go GitHub
               </a>
-              <a href="https://www.instagram.com/buy_so_team3/" class="btn btn-social bg-maroon btn-flat">
+              <a href="https://www.instagram.com/noticare_team3/" class="btn btn-social bg-maroon btn-flat">
                   <i class="fa fa-instagram"></i> Go Instagram
               </a>
           </div>
@@ -492,7 +497,7 @@
                         // 사람이 감지되었을 때 알림을 표시
                         const currentTime = Date.now();
                         if (currentTime - lastNotifiedTime > 10000) {
-                            const notification = new Notification("바이소", {
+                            const notification = new Notification("노티케어", {
                                 body: '사람이 감지 되었습니다.',
                                 icon: '/static/mainapp/dist/img/위험.png' // 이미지 파일의 경로 또는 URL을 지정합니다.
                             });

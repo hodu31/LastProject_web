@@ -1,7 +1,7 @@
 ### 필요 라이브러리 등
 from fastapi import FastAPI, HTTPException, Form, Request
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, RedirectResponse, Response, JSONResponse
 from starlette.requests import Request
 from sqlalchemy import  Column, String, MetaData, select, Integer, ForeignKey, TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
@@ -145,9 +145,11 @@ async def read_root(request: Request):
 async def read_root(request: Request):
     user_id = request.session.get("user_id")
     user = None
+
     if user_id:
         query = select(LastproUser).where(LastproUser.USER_ID == user_id)
         user = await database.fetch_one(query)
+
     return templates.TemplateResponse("index.html", {"request": request, "user": user})
 
 
@@ -179,6 +181,22 @@ async def login(request: Request, USER_ID: str = Form(...), USER_PW: str = Form(
     
     request.session["user_id"] = USER_ID
     return RedirectResponse(url="/index", status_code=303)
+
+@app.post("/reauthenticate/")
+async def reauthenticate(request: Request, USER_PW: str = Form(...)):
+    query = select(LastproUser).where(LastproUser.USER_PW == USER_PW)
+    user = await database.fetch_one(query)
+    if user is None:
+        return JSONResponse(content={"success": False, "error": "패스워드가 잘못되었습니다."})
+    
+    request.session["user_pw"] = USER_PW
+    return JSONResponse(content={"success": True})
+
+
+
+
+
+
 
 
 
