@@ -8,15 +8,14 @@ from sqlalchemy.ext.declarative import declarative_base
 from databases import Database
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy.dialects.mysql import MEDIUMBLOB
 from sqlalchemy.sql import func
 
 
 ### 서버 실행 코드: uvicorn main:app --reload ###
 
 # 데이터베이스 연결 URL 설정
-DATABASE_URL = "mysql+pymysql://root:0000@127.0.0.1:3306/security"
-
+# DATABASE_URL = "mysql+pymysql://root:0000@127.0.0.1:3306/security"
+DATABASE_URL = "mysql+pymysql://admin:noticare@db-noticare.cvcrdfcptqp8.ap-northeast-2.rds.amazonaws.com:3306/security"
 
 # 데이터베이스 객체 생성
 database = Database(DATABASE_URL)
@@ -47,7 +46,7 @@ Base = declarative_base()
 # ls user 모델 정의
 class LastproUser(Base):
     __tablename__ = "LASTPRO_USERS"
-    USER_ID = Column(String(40), primary_key=True, index=True)
+    USER_ID = Column(String(40), primary_key=True)
     USER_PW = Column(String(40))
     USER_NM = Column(String(15))
     USER_BIR = Column(String(20))
@@ -58,33 +57,31 @@ class LastproUser(Base):
 # ls shop 모델 정의
 class LastproShop(Base):
     __tablename__ = "LASTPRO_SHOP"
-    SHOP_ID = Column(String(40), primary_key=True, index=True)
-    USER_ID = Column(String(40), ForeignKey("LASTPRO_USERS.USER_ID"), index=True)
+    SHOP_ID = Column(String(40), primary_key=True)
+    USER_ID = Column(String(40), ForeignKey("LASTPRO_USERS.USER_ID"), primary_key=True)
    
 # ls visit 모델 정의
 class LastproVisit(Base):
     __tablename__ = "LASTPRO_VISIT"
-    SHOP_ID = Column(String(40), ForeignKey("LASTPRO_SHOP.SHOP_ID"), index=True)
-    USER_ID = Column(String(40), ForeignKey("LASTPRO_USERS.USER_ID"), index=True)
-    V_ID = Column(String(50), primary_key=True, index=True)
+    SHOP_ID = Column(String(40), ForeignKey("LASTPRO_SHOP.SHOP_ID"), primary_key=True)
+    USER_ID = Column(String(40), ForeignKey("LASTPRO_USERS.USER_ID"), primary_key=True)
+    V_ID = Column(String(50), primary_key=True)
     V_ENTIME = Column(TIMESTAMP, server_default=func.now(), nullable=False)
-    V_EXTIME = Column(TIMESTAMP, server_default=func.now(), nullable=False)
-    V_CAM = Column(MEDIUMBLOB)
     
     
 # ls dancode 모델 정의
 class LastproDanCode(Base):
     __tablename__ = "LASTPRO_DAN_CODE"
-    DAN_CODE = Column(Integer, primary_key=True, index=True)
+    DAN_CODE = Column(Integer, primary_key=True)
     DAN_CODE_KOR = Column(String(50))
     
 class LastproDan(Base):
     __tablename__ = "LASTPRO_DAN"
-    DAN_V_ID = Column(String(50), primary_key=True, index=True)
-    SHOP_ID = Column(String(40), ForeignKey("LASTPRO_SHOP.SHOP_ID"), primary_key=True, index=True)
-    USER_ID = Column(String(40), ForeignKey("LASTPRO_USERS.USER_ID"), primary_key=True, index=True)
-    DAN_CODE = Column(Integer, ForeignKey("LASTPRO_DAN_CODE.DAN_CODE"), primary_key=True, index=True)
-    DAN_TIME = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+    DAN_V_ID = Column(String(50),ForeignKey("LASTPRO_VISIT.V_ID"), primary_key=True)
+    SHOP_ID = Column(String(40), ForeignKey("LASTPRO_SHOP.SHOP_ID"), primary_key=True)
+    USER_ID = Column(String(40), ForeignKey("LASTPRO_USERS.USER_ID"), primary_key=True)
+    DAN_CODE = Column(Integer, ForeignKey("LASTPRO_DAN_CODE.DAN_CODE"), primary_key=True)
+    DAN_TIME = Column(TIMESTAMP,primary_key=True ,server_default=func.now(), nullable=False)
 
     
 # 공통 로직을 위한 비동기 함수

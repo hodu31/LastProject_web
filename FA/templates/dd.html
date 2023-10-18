@@ -54,8 +54,6 @@
         <th>유저 아이디</th>
         <th>방문객 아이디</th>
         <th>입장 시간</th>
-        <th>퇴장 시간</th>
-        <th>CAM DATA</th>
       </tr>
       {% for user2 in visits %}
       <tr>
@@ -63,8 +61,6 @@
         <td>{{ user2.USER_ID }}</td>
         <td>{{ user2.V_ID }}</td>
         <td>{{ user2.V_ENTIME }}</td>
-        <td>{{ user2.V_EXTIME }}</td>
-        <td>{{ user2.V_CAM }}</td>
       </tr>
       {% endfor %}
     </table>
