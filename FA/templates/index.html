@@ -622,28 +622,13 @@ document.getElementById('toggleNotification').addEventListener('click', function
 </script>
 <!-- 임시                                    -->
 <script>
-// Initialize empty log array
-const detectedLogs1 = [];
-
-// Mapping of DAN_CODE to words
-const codeToWord = {
-    1: '구매',
-    2: '비교',
-    3: '방화',
-    4: '기절',
-    5: '선택',
-    6: '흡연',
-    7: '절도',
-    8: '유기',
-};
-
-let ws = null;
-
 // 웹소켓 연결 함수
 function connect() {
-  // 도메인 연결
- 
+  if (ws) {
+    ws.close(); // 현재 연결을 닫음
+  }
 
+  // 새로운 웹소켓 연결 설정
   ws = new WebSocket("wss://noticare.store/ws");
   ws.onopen = function(event) {
     console.log("웹소켓 연결 성공");
@@ -681,6 +666,7 @@ function connect() {
 
 // 초기 연결
 connect();
+
 </script>
 
 <script>
