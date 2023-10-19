@@ -10,7 +10,9 @@ from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.sql import func
 import asyncio
-from sqlalchemy import select,desc
+from sqlalchemy import select,func
+
+
 ### 서버 실행 코드: uvicorn main:app --reload ###
 
 # 데이터베이스 연결 URL 설정
@@ -140,28 +142,29 @@ async def get_monthly_visitors():
     result = await database.fetch_all(query)
     return {"monthly_visitors": result}
 
-
-last_row_count = 0  # 마지막으로 확인한 행의 개수
+last_row_count = None  # 초기값을 None으로 설정
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    global last_row_count  # 전역 변수를 수정하기 위해 선언
     await websocket.accept()
-    global last_row_count
+
+    if last_row_count is None:  # 처음 호출될 때만 초기값 설정
+        initial_count_query = select(func.count()).select_from(LastproDan)
+        last_row_count = await database.fetch_val(initial_count_query)
+
     while True:
-        count_query = select(func.count()).select_from(LastproDan)  # 행의 개수를 가져오는 쿼리
-        current_row_count = await database.fetch_val(count_query)  # 현재 행의 개수
-
-        if current_row_count > last_row_count:  # 현재 행의 개수가 마지막 확인 개수보다 크다면
+        count_query = select(func.count()).select_from(LastproDan)
+        current_row_count = await database.fetch_val(count_query)
+        
+        if current_row_count > last_row_count:
             new_row_query = select(LastproDan).order_by(LastproDan.DAN_TIME.desc()).limit(1)
-
-            latest_dan = await database.fetch_one(new_row_query)  # 가장 최근에 추가된 행
-            await websocket.send_json({"dan_code": latest_dan['DAN_CODE']})  # 알림 보내기
+            latest_dan = await database.fetch_one(new_row_query)
+            await websocket.send_json({"dan_code": latest_dan['DAN_CODE']})
             
-            last_row_count = current_row_count  # 마지막 확인 행의 개수 업데이트
+            last_row_count = current_row_count  # 값을 업데이트
 
         await asyncio.sleep(1)
-
-
 
 # 모든 페이지에 대한 핸들러
 @app.get("/{page}", response_class=HTMLResponse)
