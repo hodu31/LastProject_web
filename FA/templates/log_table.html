@@ -142,5 +142,20 @@
       })
     </script>
 
+    <script>
+      const table = document.querySelector('table');
+const rows = Array.from(table.querySelectorAll('tr')).slice(1); // 헤더 제외한 모든 행을 선택
+
+const sortedRows = rows.sort((a, b) => {
+  const timeA = new Date(a.cells[3].innerText).getTime(); // 4번째 셀이 'DAN_TIME'
+  const timeB = new Date(b.cells[3].innerText).getTime(); // 4번째 셀이 'DAN_TIME'
+  
+  return timeB - timeA; // 내림차순 정렬
+});
+
+// 정렬된 행으로 테이블 다시 구성
+table.tBodies[0].append(...sortedRows);
+
+    </script>
   </body>
 </html>

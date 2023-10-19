@@ -15,9 +15,11 @@ from sqlalchemy import select,func
 
 ### 서버 실행 코드: uvicorn main:app --reload ###
 
-# 데이터베이스 연결 URL 설정
-#DATABASE_URL = "mysql+pymysql://root:0000@127.0.0.1:3306/security"
-DATABASE_URL = "mysql+pymysql://admin:noticare@db-noticare.cvcrdfcptqp8.ap-northeast-2.rds.amazonaws.com:3306/security"
+# 로케이션 데이터베이스 연결 URL 설정
+DATABASE_URL = "mysql+pymysql://root:0000@127.0.0.1:3306/security"
+
+# 서버 데이터베이스 연결 URL 설정
+#DATABASE_URL = "mysql+pymysql://admin:noticare@db-noticare.cvcrdfcptqp8.ap-northeast-2.rds.amazonaws.com:3306/security"
 
 # 데이터베이스 객체 생성
 database = Database(DATABASE_URL)
@@ -142,29 +144,29 @@ async def get_monthly_visitors():
     result = await database.fetch_all(query)
     return {"monthly_visitors": result}
 
-last_row_count = None  # 초기값을 None으로 설정
 
+last_added_row_id = None  # 초기값을 None으로 설정
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    global last_row_count  # 전역 변수를 수정하기 위해 선언
+    global last_added_row_id  # 전역 변수를 수정하기 위해 선언
     await websocket.accept()
 
-    if last_row_count is None:  # 처음 호출될 때만 초기값 설정
-        initial_count_query = select(func.count()).select_from(LastproDan)
-        last_row_count = await database.fetch_val(initial_count_query)
+    # 처음 호출될 때만 초기값 설정
+    if last_added_row_id is None:
+        initial_query = select(LastproDan).order_by(LastproDan.DAN_TIME.desc()).limit(1)
+        last_added_row = await database.fetch_one(initial_query)
+        last_added_row_id = last_added_row['DAN_TIME']  
 
     while True:
-        count_query = select(func.count()).select_from(LastproDan)
-        current_row_count = await database.fetch_val(count_query)
-        
-        if current_row_count > last_row_count:
-            new_row_query = select(LastproDan).order_by(LastproDan.DAN_TIME.desc()).limit(1)
-            latest_dan = await database.fetch_one(new_row_query)
-            await websocket.send_json({"dan_code": latest_dan['DAN_CODE']})
-            
-            last_row_count = current_row_count  # 값을 업데이트
+        new_row_query = select(LastproDan).filter(LastproDan.DAN_TIME > last_added_row_id).order_by(LastproDan.DAN_TIME.asc())
+        new_rows = await database.fetch_all(new_row_query)
 
-        await asyncio.sleep(3)
+        for row in new_rows:
+            await websocket.send_json({"dan_code": row['DAN_CODE']})
+            last_added_row_id = row['DAN_TIME']  # 값을 업데이트
+
+        await asyncio.sleep(2)
+
 
 # 모든 페이지에 대한 핸들러
 @app.get("/{page}", response_class=HTMLResponse)
