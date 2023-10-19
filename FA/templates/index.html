@@ -570,20 +570,20 @@ async function detectFromVideoFrame(net) {
             for (let i = 0; i < predictions.length; i++) {  
                 if (predictions[i].class === 'person') {
                     const currentTime = Date.now();
-                    if (currentTime - lastNotifiedTime > 10000 && notificationEnabled) {
+                    if (currentTime - lastNotifiedTime > 30000 && notificationEnabled) {
                         const notification = new Notification("노티케어", {
-                            body: '움직임이 감지 되었습니다.',
+                            body: '사람이 감지 되었습니다.',
                             icon: '/static/mainapp/dist/img/사람감지.jpg'
                         });
 
                         // 로그 저장
                         const timeString = new Date().toLocaleString();
-                        detectedLogs.push(`${timeString} - 움직임이 감지되었습니다.`);
+                        detectedLogs.push(`${timeString} - 사람이 감지되었습니다.`);
 
                         // 특정한 box-body만 업데이트
                         const boxBody = document.getElementById('customBoxBody');
                         const newElement = document.createElement('div');
-                        newElement.innerHTML = `<p>${timeString} - 움직임이 감지되었습니다.</p>`;
+                        newElement.innerHTML = `<p>${timeString} - 사람이 감지되었습니다.</p>`;
                         boxBody.appendChild(newElement);
 
 
@@ -620,7 +620,6 @@ document.getElementById('toggleNotification').addEventListener('click', function
       loadModel();  // 모델 로딩 함수도 호출
 
 </script>
-
 <!-- 임시                                    -->
 <script>
 // Initialize empty log array
@@ -643,8 +642,7 @@ let ws = null;
 // 웹소켓 연결 함수
 function connect() {
   // ws = new WebSocket("ws://127.0.0.1:8000/ws");
-  ws = new WebSocket("wss://noticare.store/ws");
-
+  ws = new WebSocket("wss://3.39.24.74:80/ws");
   ws.onopen = function(event) {
     console.log("웹소켓 연결 성공");
   };
