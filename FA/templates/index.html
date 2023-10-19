@@ -641,8 +641,7 @@ let ws = null;
 
 // 웹소켓 연결 함수
 function connect() {
-  // ws = new WebSocket("ws://127.0.0.1:8000/ws");
-  ws = new WebSocket("wss://3.39.24.74:443/ws");
+  ws = new WebSocket("wss://noticare.store/ws");
   ws.onopen = function(event) {
     console.log("웹소켓 연결 성공");
   };
