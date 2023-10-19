@@ -141,17 +141,24 @@ async def get_monthly_visitors():
 
 last_dan_time = None  # 마지막으로 확인한 DAN_TIME
 
+last_row_count = 0  # 마지막으로 확인한 행의 개수
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    global last_dan_time
+    global last_row_count
     while True:
-        dan_query = select(LastproDan).order_by(LastproDan.DAN_TIME.desc())
-        latest_dan = await database.fetch_one(dan_query)
+        count_query = select(func.count()).select_from(LastproDan)  # 행의 개수를 가져오는 쿼리
+        current_row_count = await database.fetch_val(count_query)  # 현재 행의 개수
 
-        if latest_dan and (last_dan_time is None or latest_dan['DAN_TIME'] > last_dan_time):
-            last_dan_time = latest_dan['DAN_TIME']
-            await websocket.send_json({"dan_code": latest_dan['DAN_CODE']})
+        if current_row_count > last_row_count:  # 현재 행의 개수가 마지막 확인 개수보다 크다면
+            # 가장 최근에 추가된 행을 가져오는 쿼리; 이 부분은 DB 구조에 따라 조정해야 할 수 있습니다.
+            new_row_query = select(LastproDan).order_by(LastproDan.id.desc()).limit(1)
+            latest_dan = await database.fetch_one(new_row_query)  # 가장 최근에 추가된 행
+            await websocket.send_json({"dan_code": latest_dan['DAN_CODE']})  # 알림 보내기
+            
+            last_row_count = current_row_count  # 마지막 확인 행의 개수 업데이트
+
         await asyncio.sleep(1)
 
 
