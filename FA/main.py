@@ -10,6 +10,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.sql import func
 import asyncio
+from sqlalchemy import select,desc
 ### 서버 실행 코드: uvicorn main:app --reload ###
 
 # 데이터베이스 연결 URL 설정
