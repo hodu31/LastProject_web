@@ -159,6 +159,10 @@
 }
 
 
+  .box.box-solid.bg-teal-gradient {
+    height: 420px; /* 원하는 높이로 설정하세요 */
+  }
+
 </style>
 
 </head>
@@ -182,7 +186,7 @@
                   <li class="dropdown user user-menu">
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                           <img src="/static/mainapp/dist/img/cat5.jpg" class="user-image" alt="User Image"/> <!-- 원래 이미지 유지 -->
-                          <span class="hidden-xs">({{ user.USER_BIR }}) {{ user.USER_NM }}님 환영합니다.</span>
+                          <span class="hidden-xs">({{ user.USER_STORE }}) {{ user.USER_NM }}님 환영합니다.</span>
                       </a>
                       <ul class="dropdown-menu">
                           <li><a href="/logout/" class="dropdown-item">로그아웃</a></li>
@@ -272,9 +276,9 @@
 
             <li><a href="/"><i class="fa fa-book"></i> About Us</a></li>
             <li class="header">Area</li>
-            <li><a href="/index"><i class="fa fa-circle-o text-info"></i> 매장 이상감지</a></li>
-            <li><a href="/index2/"><i class="fa fa-circle-o text-warning"></i> 병원 이상감지</a></li>
-            <li><a href="/index3"><i class="fa fa-circle-o text-danger"></i> 가정 이상감지</a></li>
+            <li><a href="/index"><i class="fa fa-circle-o text-info"></i> 매장 행동감지</a></li>
+            <li><a href="/index2/"><i class="fa fa-circle-o text-warning"></i> 병원 행동감지</a></li>
+            <li><a href="/index3"><i class="fa fa-circle-o text-danger"></i> 가정 행동감지</a></li>
           </ul>
         </section>
         <!-- /.sidebar 끝 -->
@@ -297,10 +301,10 @@
           <div class="row">
             <div class="col-lg-3 col-xs-6">
               <!-- small box -->
-              <div class="small-box bg-red">
+              <div class="small-box bg-blue">
                 <div class="inner">
-                  <h3>{{ dan_count }}</h3>
-                  <p>매장 내 이상 감지</p>
+                  <h3 id="dan-count">{{ dan_count }}</h3>
+                  <p>매장 내 행동 감지</p>
                 </div>
                 <div class="icon">
                   <i class="fa fa-video-camera"></i> <!-- CCTV 아이콘 클래스: fa-video-camera -->
@@ -310,9 +314,9 @@
             </div><!-- ./col -->
             <div class="col-lg-3 col-xs-6">
               <!-- small box -->
-              <div class="small-box bg-blue">
+              <div class="small-box bg-red">
                 <div class="inner">
-                  <h3>0<sup style="font-size: 20px">%</sup></h3>
+                  <h3 id="dan2-count">{{ dan_count2 }}0</h3>
                   <p>이상 감지 현황</p>
                 </div>
                 <div class="icon">
@@ -325,7 +329,7 @@
               <!-- small box -->
               <div class="small-box bg-yellow">
                 <div class="inner">
-                  <h3>{{ visitor_count }}</h3>
+                  <h3 id="visitor-count">{{ visitor_count }}</h3>
                   <p>방문객 수</p>
                 </div>
                 <div class="icon">
@@ -338,7 +342,7 @@
               <!-- small box -->
               <div class="small-box bg-aqua">
                 <div class="inner">
-                  <h3>0</h3>
+                  <h3>86,300</h3>
                   <p>매출 통계</p>
                 </div>
                 <div class="icon">
@@ -389,16 +393,17 @@
             <section class="col-lg-5 connectedSortable">
 
               <!-- solid sales graph -->
-              <div class="box box-solid bg-teal-gradient">
+              <div class="box box-solid bg-teal-gradient" id="box1">
                 <div class="box-header">
                   <i class="fa fa-bell-o"></i>
                   <h3 class="box-title">알림 감지 목록</h3>
                   <div class="box-tools pull-right">
+                    <button class="btn bg-teal btn-sm" id="viewLogsButton">전체 로그 확인</button>
                     <button id="clearLogs" class="btn bg-teal btn-sm">로그 지우기</button>
+                    <button id="toggleNotification" class="btn bg-teal btn-sm"><i id="notificationIcon" class="fa fa-bell"></i></button>
                     <button class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                    <button class="btn bg-teal btn-sm" data-widget="remove"><i class="fa fa-times"></i></button>
                   </div>
-                 <div id="customBoxBody" class="box-body border-radius-none">
+                 <div id="customBoxBody" class="box-body border-radius-none" style="font-size: 25px;">
                 </div><!-- /.box-body -->
               </div>
                 </div>
@@ -446,6 +451,11 @@
           </div>
       </footer>
     </div><!-- ./wrapper -->
+
+    <div id="logs">
+  <!-- Logs will be appended here -->
+</div>
+
     <!-- jQuery 2.1.3 -->
     <script src="/static/mainapp/plugins/jQuery/jQuery-2.1.3.min.js"></script>
     <!-- jQuery UI 1.11.2 (s 추가)-->
@@ -494,18 +504,36 @@
 
 <!-- 드루이드 캠 스크립트 -->
 <script>
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-            let video = document.getElementById('cameraStream');
-            video.srcObject = stream;
-        })
-        .catch(error => {
-            console.error("Error accessing the camera", error);
-        });
+// 카메라 접근 함수
+async function setupCamera() {
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  const cameraDevice = devices.find(device => device.kind === 'videoinput' && device.label.includes('HD20W'));
+
+  if (!cameraDevice) {
+    console.error('HD20W camera not found');
+    return;
+  }
+
+  const stream = await navigator.mediaDevices.getUserMedia({ 
+    video: { 
+      deviceId: { exact: cameraDevice.deviceId }
+    }
+  });
+
+  const videoElement = document.getElementById('cameraStream');
+  videoElement.srcObject = stream;
+}
+
+// 카메라 설정
+setupCamera().catch(error => {
+  console.error("Error accessing the camera", error);
+});
+
 </script>
 <!-- 임시                                    -->
 <script>
-  let detectedLogs = [];  // 감지 로그를 저장할 배열
+  let detectedLogs = [];  
+  let notificationEnabled = true;  
 
   Notification.requestPermission().then(function(permission) {
     if (permission === 'granted') {
@@ -527,47 +555,60 @@
       };
   }
 
-  async function detectFromVideoFrame(net) {
-      const video = document.getElementById('cameraStream');
+async function detectFromVideoFrame(net) {
+    const video = document.getElementById('cameraStream');
 
-      if (video.readyState === video.HAVE_ENOUGH_DATA) {
-          try {
-              const predictions = await net.detect(video);
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        try {
+            const predictions = await net.detect(video);
 
-              for (let i = 0; i < predictions.length; i++) {
-                  if (predictions[i].class === 'person') {
-                      const currentTime = Date.now();
-                      if (currentTime - lastNotifiedTime > 10000) {
-                          const notification = new Notification("노티케어", {
-                              body: '사람이 감지 되었습니다.',
-                              icon: '/static/mainapp/dist/img/위험.png'
-                          });
-                          lastNotifiedTime = currentTime;
+            for (let i = 0; i < predictions.length; i++) {  
+                if (predictions[i].class === 'person') {
+                    const currentTime = Date.now();
+                    if (currentTime - lastNotifiedTime > 30000 && notificationEnabled) {
+                        const notification = new Notification("노티케어", {
+                            body: '사람이 감지 되었습니다.',
+                            icon: '/static/mainapp/dist/img/사람감지.jpg'
+                        });
 
-                          // 로그 저장
-                          const timeString = new Date().toLocaleString();
-                          detectedLogs.push(`${timeString} - 사람이 감지되었습니다.`);
+                        // 로그 저장
+                        const timeString = new Date().toLocaleString();
+                        detectedLogs.push(`${timeString} - 사람이 감지되었습니다.`);
 
-                          // 특정한 box-body만 업데이트
-                          const boxBody = document.getElementById('customBoxBody');
-                          const newElement = document.createElement('div');
-                          newElement.innerHTML = `<p>${timeString} - 사람이 감지되었습니다.</p>`;
-                          boxBody.appendChild(newElement);
-                      }
-                  }
-              }
-          } catch (error) {
-              console.error('Error:', error);
-          }
-      }
-      requestAnimationFrame(() => {
-          detectFromVideoFrame(net);
-      });
-  }
+                        // 특정한 box-body만 업데이트
+                        const boxBody = document.getElementById('customBoxBody');
+                        const newElement = document.createElement('div');
+                        newElement.innerHTML = `<p>${timeString} - 사람이 감지되었습니다.</p>`;
+                        boxBody.appendChild(newElement);
 
+
+                        lastNotifiedTime = currentTime;
+                        
+                    }
+                }
+            }
+        } catch (error) { 
+            console.error('Error:', error);
+        }
+    }
+
+    requestAnimationFrame(() => {
+        detectFromVideoFrame(net);
+    });
+}
 document.getElementById('clearLogs').addEventListener('click', function() {
   const boxBody = document.getElementById('customBoxBody');
   boxBody.innerHTML = '';  // 모든 로그 지우기
+});
+document.getElementById('toggleNotification').addEventListener('click', function() {
+    notificationEnabled = !notificationEnabled;
+    console.log("notificationEnabled:", notificationEnabled);  // 상태 출력
+    const iconElement = document.getElementById('notificationIcon');
+    if (notificationEnabled) {
+        iconElement.className = "fa fa-bell";
+    } else {
+        iconElement.className = "fa fa-bell-slash";
+    }
 });
 
 
@@ -576,23 +617,56 @@ document.getElementById('clearLogs').addEventListener('click', function() {
 </script>
 
 <!-- 임시                                    -->
-
-
 <script>
-document.getElementById("requestPermissionButton").addEventListener("click", function() {
-    Notification.requestPermission().then(function(permission) {
-        if (permission === "granted") {
-            // 사용자가 권한을 허용한 경우
-            alert("알림 권한이 허용되었습니다.");
-        } else if (permission === "denied") {
-            // 사용자가 권한을 거부한 경우
-            alert("알림 권한이 거부되었습니다.");
-        } else {
-            // 사용자가 알림 권한을 임시로 차단한 경우 또는 브라우저에서 지원하지 않는 경우
-            alert("알림 권한을 설정할 수 없습니다.");
-        }
-    });
+// Initialize empty log array
+const detectedLogs1 = [];
+
+// Initialize WebSocket
+const ws = new WebSocket("ws://127.0.0.1:8000/ws");
+
+// Mapping of DAN_CODE to words
+const codeToWord = {
+    1: '구매',
+    2: '비교',
+    3: '방화',
+    4: '기절',
+    5: '선택',
+    6: '흡연',
+    7: '절도',
+    8: '유기',
+}
+
+// Listen for messages from the server
+ws.addEventListener("message", function(event) {
+    const data = JSON.parse(event.data);
+    const timeString = new Date().toLocaleString();
+
+    // Determine message based on received DAN_CODE
+    const message = codeToWord[data.dan_code] || "알 수 없는 행동";
+
+    // Log the message
+    detectedLogs1.push(`${timeString} - ${message} 감지됨`);
+
+    // Trigger web push notification
+    if (Notification.permission === "granted") {
+        new Notification('노티케어', {
+            icon: '/static/mainapp/dist/img/위험.png',
+            body: `${message} 행동이 감지 되었습니다.`
+        });
+    }
+
+    // 로그 저장
+    const logMessage = `${timeString} - ${message} 행동이 감지 되었습니다.`;
+    detectedLogs1.push(logMessage);
+
+    // 특정한 box-body만 업데이트
+    const boxBody = document.getElementById('customBoxBody');
+    const newElement = document.createElement('div');
+    newElement.innerHTML = `<p>${logMessage}</p>`;
+    boxBody.appendChild(newElement);
 });
+
+
 </script>
 
 <script>
@@ -607,7 +681,41 @@ function toggleLock() {
         lockIcon.classList.add("fa-lock");
     }
 }
+</script>
+
+<script>
+  document.getElementById('viewLogsButton').addEventListener('click', function() {
+    window.open('/log_table', '_blank', 'width=700,height=600');
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  setInterval(async () => {
+    try {
+      // dan_count 가져오기
+      const danResponse = await fetch("/get_dan_count");
+      const danData = await danResponse.json();
+      document.getElementById("dan-count").innerText = danData.dan_count;
+
+      // visitor_count 가져오기
+      const visitorResponse = await fetch("/get_visitor_count");
+      const visitorData = await visitorResponse.json();
+      document.getElementById("visitor-count").innerText = visitorData.visitor_count;
+
+      // dan_count2 가져오기
+      const dan2Response = await fetch("/get_dan_count2");
+      const dan2Data = await dan2Response.json();
+      document.getElementById("dan2-count").innerText = dan2Data.dan_count2; 
+        
+    } catch (error) {
+      console.error("Could not update counts:", error);
+    }
+  }, 1000);
+});
 
 </script>
+
+
   </body>
 </html>

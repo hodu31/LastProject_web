@@ -1,20 +1,19 @@
 ### 필요 라이브러리 등
-from fastapi import FastAPI, HTTPException, Form, Request
+from fastapi import FastAPI, HTTPException, Form, Request,WebSocket
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse, Response, JSONResponse
 from starlette.requests import Request
-from sqlalchemy import  Column, String, MetaData, select, Integer, ForeignKey, TIMESTAMP
+from sqlalchemy import  Column, String, MetaData, select, Integer, ForeignKey, TIMESTAMP, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from databases import Database
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.sql import func
-
-
+import asyncio
 ### 서버 실행 코드: uvicorn main:app --reload ###
 
 # 데이터베이스 연결 URL 설정
-# DATABASE_URL = "mysql+pymysql://root:0000@127.0.0.1:3306/security"
+#DATABASE_URL = "mysql+pymysql://root:0000@127.0.0.1:3306/security"
 DATABASE_URL = "mysql+pymysql://admin:noticare@db-noticare.cvcrdfcptqp8.ap-northeast-2.rds.amazonaws.com:3306/security"
 
 # 데이터베이스 객체 생성
@@ -49,10 +48,10 @@ class LastproUser(Base):
     USER_ID = Column(String(40), primary_key=True)
     USER_PW = Column(String(40))
     USER_NM = Column(String(15))
-    USER_BIR = Column(String(20))
+    USER_STORE = Column(String(20))
     USER_ADD = Column(String(30))
     USER_HP = Column(String(20))
-    USER_AREA = Column(String(30))
+    USER_ADD2 = Column(String(30))
     
 # ls shop 모델 정의
 class LastproShop(Base):
@@ -75,6 +74,7 @@ class LastproDanCode(Base):
     DAN_CODE = Column(Integer, primary_key=True)
     DAN_CODE_KOR = Column(String(50))
     
+# ls dan 모델 정의
 class LastproDan(Base):
     __tablename__ = "LASTPRO_DAN"
     DAN_V_ID = Column(String(50),ForeignKey("LASTPRO_VISIT.V_ID"), primary_key=True)
@@ -108,6 +108,53 @@ async def get_common_data():
   
     return users, shops, visits, dancodes, dans
 
+
+
+@app.get("/get_dan_count")
+async def get_dan_count():
+    dan_query = select(LastproDan)
+    dans = await database.fetch_all(dan_query)
+    return {"dan_count": len(dans)}
+
+@app.get("/get_visitor_count")
+async def get_visitor_count():
+    visit_query = select(LastproVisit)  # LastproVisit는 방문자 정보를 담고 있는 테이블이라고 가정합니다.
+    visits = await database.fetch_all(visit_query)
+    return {"visitor_count": len(visits)}
+
+@app.get("/get_dan_count2")
+async def get_dan_count2():
+    dan_query = select(LastproDan).filter(LastproDan.DAN_CODE.in_([3, 4, 6, 7, 8]))
+    dans2 = await database.fetch_all(dan_query)
+    return {"dan_count2": len(dans2)}
+
+@app.get("/get_monthly_visitors")
+async def get_monthly_visitors():
+    query = """
+    SELECT DATE_FORMAT(V_ENTIME, '%Y-%m') as month, COUNT(*) as counts
+    FROM LASTPRO_VISIT
+    WHERE YEAR(V_ENTIME) = 2023
+    GROUP BY month
+    """
+    result = await database.fetch_all(query)
+    return {"monthly_visitors": result}
+
+last_dan_id = None  # 마지막으로 확인한 DAN_V_ID
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    global last_dan_id
+    while True:
+        dan_query = select(LastproDan).order_by(LastproDan.DAN_TIME.desc())
+        latest_dan = await database.fetch_one(dan_query)
+
+        if latest_dan and latest_dan['DAN_V_ID'] != last_dan_id:
+            last_dan_id = latest_dan['DAN_V_ID']
+            await websocket.send_json({"dan_code": latest_dan['DAN_CODE']})
+        await asyncio.sleep(1)
+
+
 # 모든 페이지에 대한 핸들러
 @app.get("/{page}", response_class=HTMLResponse)
 async def read_page(request: Request, page: str):
@@ -134,7 +181,6 @@ async def read_page(request: Request, page: str):
             {"request": request, "user": user, "users": users, "shops": shops, "visits": visits, "dancodes": dancodes, "dans": dans,
              "visitor_count":visitor_count, "dan_count":dan_count}
         )
-
 
 
 
@@ -196,13 +242,6 @@ async def reauthenticate(request: Request, USER_PW: str = Form(...)):
     return JSONResponse(content={"success": True})
 
 
-
-
-
-
-
-
-
 # 로그아웃 처리 핸들러
 @app.get("/logout/")
 def logout(request: Request):
@@ -227,10 +266,10 @@ async def signup(
     USER_ID: str = Form(...),
     USER_PW: str = Form(...),
     USER_NM: str = Form(...),
-    USER_BIR: str = Form(...),
+    USER_STORE: str = Form(...),
     USER_ADD: str = Form(...),
     USER_HP: str = Form(...),
-    USER_AREA: str = Form(...)
+    USER_ADD2: str = Form(...)
 ):
     # 이미 존재하는 사용자인지 확인
     query = select(LastproUser).where(LastproUser.USER_ID == USER_ID)
@@ -243,10 +282,10 @@ async def signup(
         USER_ID=USER_ID,
         USER_PW=USER_PW,
         USER_NM=USER_NM,
-        USER_BIR=USER_BIR,
+        USER_STORE=USER_STORE,
         USER_ADD=USER_ADD,
         USER_HP=USER_HP,
-        USER_AREA=USER_AREA
+        USER_ADD2=USER_ADD2
     )
     await database.execute(query)
 

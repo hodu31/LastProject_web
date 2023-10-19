@@ -19,6 +19,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <meta
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
@@ -312,7 +313,7 @@
               <!-- DONUT CHART -->
               <div class="box box-danger">
                 <div class="box-header">
-                  <h3 class="box-title"><b>RPV</b> Chart</h3>
+                  <h3 class="box-title"><b>감지</b> Donut-Chart</h3>
                 </div>
                 <div class="box-body chart-responsive">
                   <div
@@ -346,7 +347,7 @@
               <!-- BAR CHART -->
               <div class="box box-success">
                 <div class="box-header">
-                  <h3 class="box-title"><b>RPV</b> Bar-Chart</h3>
+                  <h3 class="box-title"><b>감지</b> Bar-Chart</h3>
                 </div>
                 <div class="box-body chart-responsive">
                   <div class="chart" id="bar-chart" style="height: 300px"></div>
@@ -414,83 +415,108 @@
       $(function () {
         'use strict'
 
-        // AREA CHART FOR STORE VISITORS
-        var visitors = new Morris.Area({
-          element: 'revenue-chart', // 차트가 그려질 요소의 ID
-          resize: true, // 차트 크기 조절 가능 여부
-          data: [
-            { y: '2023-01', visitors: 120 },
-            { y: '2023-02', visitors: 220 },
-            { y: '2023-03', visitors: 100 },
-            { y: '2023-04', visitors: 80 },
-            { y: '2023-05', visitors: 75 },
-            { y: '2023-06', visitors: 100 },
-            { y: '2023-07', visitors: 150 },
-            { y: '2023-08', visitors: 132 },
-            { y: '2023-09', visitors: 40 },
-            { y: '2023-10', visitors: 10 },
-            { y: '2023-11', visitors: 130 },
-            { y: '2023-12', visitors: 120 },
-          ],
-          xkey: 'y',
-          ykeys: ['visitors'],
-          labels: ['Visitors'],
-          lineColors: ['#3c8dbc'],
-          hideHover: 'auto',
-        })
+        var visitors
 
-        // LINE CHART FOR QUARTERLY SALES
-        var sales = new Morris.Line({
-          element: 'line-chart', // 차트가 그려질 요소의 ID
-          resize: true,
-          data: [
-            { y: '2023 Q1', sales: 12666 },
-            { y: '2023 Q2', sales: 22778 },
-            { y: '2023 Q3', sales: 14912 },
-            { y: '2023 Q4', sales: 33767 },
-          ],
-          xkey: 'y',
-          ykeys: ['sales'],
-          labels: ['Sales'],
-          lineColors: ['#3c8dbc'],
-          hideHover: 'auto',
-        })
+        Promise.all([
+          axios.get('/get_visitor_count'),
+          axios.get('/get_dan_count'),
+          axios.get('/get_dan_count2'),
+          axios.get('/get_monthly_visitors'), // 월별 방문자 데이터를 가져올 API
+        ])
+          .then(function (responses) {
+            var visitor_count = responses[0].data.visitor_count
+            var dan_count = responses[1].data.dan_count
+            var dan_count2 = responses[2].data.dan_count2
+            var monthly_visitors = responses[3].data.monthly_visitors // 월별 방문자 데이터
 
-        //위험감지: "Risk Detection"
-        //구매고객: "Purchasing Customers"
-        //방문고객: "Visiting Customers"
-        var donut = new Morris.Donut({
-          element: 'sales-chart',
-          resize: true,
-          colors: ['#f56954', '#00a65a', '#3c8dbc'],
-          data: [
-            { label: '위험감지', value: 10 }, // 예시 값입니다. 실제 값을 입력해주세요.
-            { label: '구매고객', value: 20 }, // 예시 값입니다. 실제 값을 입력해주세요.
-            { label: '방문고객', value: 25 }, // 예시 값입니다. 실제 값을 입력해주세요.
-          ],
-          hideHover: 'auto',
-        })
+            var additionalData = [
+              { y: '2023-01', visitors: 50 },
+              { y: '2023-02', visitors: 80 },
+              { y: '2023-03', visitors: 60 },
+              { y: '2023-04', visitors: 70 },
+              { y: '2023-05', visitors: 30 },
+              { y: '2023-06', visitors: 100 },
+              { y: '2023-07', visitors: 150 },
+              { y: '2023-08', visitors: 110 },
+              { y: '2023-09', visitors: 80 },
+              { y: '2023-11', visitors: 0 },
+              { y: '2023-12', visitors: 0 },
+            ]
 
-        //BAR CHART
-        var bar = new Morris.Bar({
-          element: 'bar-chart',
-          resize: true,
-          data: [
-            { y: '2020', a: 100, b: 90, c: 80 },
-            { y: '2021', a: 75, b: 65, c: 55 },
-            { y: '2022', a: 50, b: 40, c: 30 },
-            { y: '2023', a: 75, b: 65, c: 55 },
-          ],
-          barColors: ['#00a65a', '#3c8dbc', '#f56954'],
-          xkey: 'y',
-          ykeys: ['a', 'b', 'c'],
-          labels: [
-            'Purchasing Customers',
-            'Visiting Customers',
-            'Risk Customers',
-          ],
-          hideHover: 'auto',
-        })
+            // 월별 방문자 데이터를 Morris.js 형식으로 변환
+            var formattedMonthlyVisitors = monthly_visitors.map(function (
+              item
+            ) {
+              return {
+                y: item.month,
+                visitors: item.counts,
+              }
+            })
+
+            var mergedData = [...formattedMonthlyVisitors, ...additionalData]
+
+            // AREA CHART FOR STORE VISITORS
+            visitors = new Morris.Area({
+              element: 'revenue-chart',
+              resize: true,
+              data: mergedData, // 병합한 데이터
+              xkey: 'y',
+              ykeys: ['visitors'],
+              labels: ['Visitors'],
+              lineColors: ['#3c8dbc'],
+              hideHover: 'auto',
+            })
+
+            // 도넛 차트
+            var donut = new Morris.Donut({
+              element: 'sales-chart',
+              resize: true,
+              colors: ['#f56954', '#00a65a', '#3c8dbc'],
+              data: [
+                { label: '위험감지', value: dan_count2 },
+                { label: '행동감지', value: dan_count },
+                { label: '방문고객', value: visitor_count },
+              ],
+              hideHover: 'auto',
+            })
+
+            // 바 차트
+            var bar = new Morris.Bar({
+              element: 'bar-chart',
+              resize: true,
+              data: [
+                { y: '2020', a: 40, b: 80, c: 5 },
+                { y: '2021', a: 13, b: 95, c: 2 },
+                { y: '2022', a: 34, b: 110, c: 10 },
+                { y: '2023', a: dan_count, b: visitor_count, c: dan_count2 },
+              ],
+              barColors: ['#00a65a', '#3c8dbc', '#f56954'],
+              xkey: 'y',
+              ykeys: ['a', 'b', 'c'],
+              labels: ['행동감지', '방문고객', '위험감지'],
+              hideHover: 'auto',
+            })
+          })
+          .catch(function (error) {
+            console.log('API 호출에 문제가 발생했습니다:', error)
+          })
+      })
+
+      // LINE CHART FOR QUARTERLY SALES
+      var sales = new Morris.Line({
+        element: 'line-chart', // 차트가 그려질 요소의 ID
+        resize: true,
+        data: [
+          { y: '2023 Q1', sales: 12666 },
+          { y: '2023 Q2', sales: 22778 },
+          { y: '2023 Q3', sales: 14912 },
+          { y: '2023 Q4', sales: 33767 },
+        ],
+        xkey: 'y',
+        ykeys: ['sales'],
+        labels: ['Sales'],
+        lineColors: ['#3c8dbc'],
+        hideHover: 'auto',
       })
     </script>
   </body>
