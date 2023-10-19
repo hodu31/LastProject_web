@@ -642,7 +642,9 @@ let ws = null;
 // 웹소켓 연결 함수
 function connect() {
   // 도메인 연결
-  ws = new WebSocket("wss://noticare.store/ws");
+ 
+
+  ws = new WebSocket("wss://noicare.store/ws");
   ws.onopen = function(event) {
     console.log("웹소켓 연결 성공");
   };
