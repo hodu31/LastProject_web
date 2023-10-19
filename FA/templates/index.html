@@ -502,32 +502,37 @@
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 
 
-<!-- 드루이드 캠 스크립트 -->
 <script>
 // 카메라 접근 함수
 async function setupCamera() {
   const devices = await navigator.mediaDevices.enumerateDevices();
   const cameraDevice = devices.find(device => device.kind === 'videoinput' && device.label.includes('HD20W'));
 
-  if (!cameraDevice) {
-    console.error('HD20W camera not found');
-    return;
+  let videoConfig;
+
+  if (cameraDevice) {
+    videoConfig = {
+      video: {
+        deviceId: { exact: cameraDevice.deviceId }
+      }
+    };
+  } else {
+    // 기본 웹캠을 사용하도록 설정
+    videoConfig = { video: true };
   }
 
-  const stream = await navigator.mediaDevices.getUserMedia({ 
-    video: { 
-      deviceId: { exact: cameraDevice.deviceId }
-    }
-  });
-
-  const videoElement = document.getElementById('cameraStream');
-  videoElement.srcObject = stream;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia(videoConfig);
+    const videoElement = document.getElementById('cameraStream');
+    videoElement.srcObject = stream;
+  } catch (error) {
+    console.error("Error accessing the camera", error);
+  }
 }
 
 // 카메라 설정
-setupCamera().catch(error => {
-  console.error("Error accessing the camera", error);
-});
+setupCamera();
+
 
 </script>
 <!-- 임시                                    -->
