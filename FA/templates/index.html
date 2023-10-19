@@ -626,11 +626,7 @@ let ws; // 웹 소켓 객체를 전역 변수로 선언
 
 // 웹소켓 연결 함수
 function connect() {
-  // 현재 연결이 이미 열려있는 경우 아무것도 하지 않음
-
-    if (ws) {
-    ws.close(); // 현재 연결을 닫음
-  }
+  ws.close(); // 현재 연결을 닫음
   // 새로운 웹소켓 연결 설정
   ws = new WebSocket("wss://noticare.store:443/ws");
   ws.onopen = function(event) {
