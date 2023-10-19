@@ -139,7 +139,6 @@ async def get_monthly_visitors():
     result = await database.fetch_all(query)
     return {"monthly_visitors": result}
 
-last_dan_time = None  # 마지막으로 확인한 DAN_TIME
 
 last_row_count = 0  # 마지막으로 확인한 행의 개수
 
@@ -152,8 +151,8 @@ async def websocket_endpoint(websocket: WebSocket):
         current_row_count = await database.fetch_val(count_query)  # 현재 행의 개수
 
         if current_row_count > last_row_count:  # 현재 행의 개수가 마지막 확인 개수보다 크다면
-            # 가장 최근에 추가된 행을 가져오는 쿼리; 이 부분은 DB 구조에 따라 조정해야 할 수 있습니다.
-            new_row_query = select(LastproDan).order_by(LastproDan.id.desc()).limit(1)
+            new_row_query = select(LastproDan).order_by(LastproDan.DAN_TIME.desc()).limit(1)
+
             latest_dan = await database.fetch_one(new_row_query)  # 가장 최근에 추가된 행
             await websocket.send_json({"dan_code": latest_dan['DAN_CODE']})  # 알림 보내기
             
