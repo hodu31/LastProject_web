@@ -139,20 +139,21 @@ async def get_monthly_visitors():
     result = await database.fetch_all(query)
     return {"monthly_visitors": result}
 
-last_dan_id = None  # 마지막으로 확인한 DAN_V_ID
+last_dan_time = None  # 마지막으로 확인한 DAN_TIME
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    global last_dan_id
+    global last_dan_time
     while True:
         dan_query = select(LastproDan).order_by(LastproDan.DAN_TIME.desc())
         latest_dan = await database.fetch_one(dan_query)
 
-        if latest_dan and latest_dan['DAN_V_ID'] != last_dan_id:
-            last_dan_id = latest_dan['DAN_V_ID']
+        if latest_dan and (last_dan_time is None or latest_dan['DAN_TIME'] > last_dan_time):
+            last_dan_time = latest_dan['DAN_TIME']
             await websocket.send_json({"dan_code": latest_dan['DAN_CODE']})
         await asyncio.sleep(1)
+
 
 
 # 모든 페이지에 대한 핸들러
