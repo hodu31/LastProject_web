@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.sql import func
 import asyncio
 from sqlalchemy import select,func
-
+from fastapi.middleware.cors import CORSMiddleware
 
 ### 서버 실행 코드: uvicorn main:app --reload ###
 
@@ -144,6 +144,19 @@ async def get_monthly_visitors():
     result = await database.fetch_all(query)
     return {"monthly_visitors": result}
 
+origins = [
+    "http://localhost",
+    "http://localhost:8080",
+    "https://noticare.store",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 last_added_row_id = None  # 초기값을 None으로 설정
 @app.websocket("/ws")
