@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.sql import func
 import asyncio
 from sqlalchemy import select,func
-from fastapi.middleware.cors import CORSMiddleware
+
 
 ### 서버 실행 코드: uvicorn main:app --reload ###
 
@@ -144,31 +144,17 @@ async def get_monthly_visitors():
     result = await database.fetch_all(query)
     return {"monthly_visitors": result}
 
-origins = [
-    "http://localhost",
-    "http://localhost:8080",
-    "https://noticare.store",
-]
+last_added_row_id = None
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-last_added_row_id = None  # 초기값을 None으로 설정
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    global last_added_row_id  # 전역 변수를 수정하기 위해 선언
+    global last_added_row_id
     await websocket.accept()
 
-    # 처음 호출될 때만 초기값 설정
     if last_added_row_id is None:
         initial_query = select(LastproDan).order_by(LastproDan.DAN_TIME.desc()).limit(1)
         last_added_row = await database.fetch_one(initial_query)
-        last_added_row_id = last_added_row['DAN_TIME']  
+        last_added_row_id = last_added_row['DAN_TIME']
 
     while True:
         new_row_query = select(LastproDan).filter(LastproDan.DAN_TIME > last_added_row_id).order_by(LastproDan.DAN_TIME.asc())
@@ -176,9 +162,9 @@ async def websocket_endpoint(websocket: WebSocket):
 
         for row in new_rows:
             await websocket.send_json({"dan_code": row['DAN_CODE']})
-            last_added_row_id = row['DAN_TIME']  # 값을 업데이트
+            last_added_row_id = row['DAN_TIME']
 
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)
 
 
 # 모든 페이지에 대한 핸들러
