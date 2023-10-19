@@ -164,7 +164,7 @@ async def websocket_endpoint(websocket: WebSocket):
             
             last_row_count = current_row_count  # 값을 업데이트
 
-        await asyncio.sleep(1)
+        await asyncio.sleep(3)
 
 # 모든 페이지에 대한 핸들러
 @app.get("/{page}", response_class=HTMLResponse)
