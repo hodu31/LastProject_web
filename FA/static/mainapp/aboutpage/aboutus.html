@@ -7,6 +7,8 @@
       href="/static/mainapp/img/noticarelogo.png"
       type="image/x-icon"
     />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <meta name="description" content="" />
     <meta name="keywords" content="" />
@@ -44,6 +46,74 @@
 
       body {
         font-family: 'Nanum Gothic', sans-serif;
+      }
+    </style>
+    <style>
+      /* 모바일 환경에 적용될 스타일 */
+      @media (max-width: 767px) {
+        /* Header 스타일 */
+        #header {
+          background-color: #333;
+        }
+
+        /* 네비게이션 바 스타일 */
+        #nav ul {
+          text-align: center;
+        }
+        #nav li {
+          display: block;
+          margin: 10px 0;
+        }
+        #nav a {
+          font-size: 18px;
+          color: #fff;
+        }
+
+        /* 로고 스타일 */
+        #logo {
+          text-align: center;
+          margin: 20px 0;
+        }
+        #logo h1 {
+          font-size: 24px;
+        }
+
+        /* Featured 영역 스타일 */
+        #featured p {
+          font-size: 16px;
+        }
+
+        /* Featured 영역의 아이콘 스타일 */
+        #featured .fa {
+          font-size: 20px;
+          margin-right: 5px;
+        }
+
+        /* Featured 영역의 버튼 스타일 */
+        #featured .button {
+          font-size: 16px;
+          padding: 10px 20px;
+        }
+
+        /* Main 영역의 섹션 스타일 */
+        #main section {
+          margin-bottom: 20px;
+        }
+        #main h2 {
+          font-size: 20px;
+        }
+        #main p {
+          font-size: 16px;
+        }
+
+        /* Footer 영역의 스타일 */
+        #footer .byline {
+          font-size: 14px;
+        }
+        #footer .fa {
+          font-size: 20px;
+          margin-right: 5px;
+        }
       }
     </style>
   </head>

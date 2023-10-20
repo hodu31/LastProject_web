@@ -303,7 +303,7 @@
               <!-- small box -->
               <div class="small-box bg-blue">
                 <div class="inner">
-                  <h3 id="dan-count">{{ dan_count }}</h3>
+                <h3 id="dan-count" class="d-inline">{{ dan_count }}</h3><h5 class="d-inline"> 건</h5>
                   <p>매장 내 행동 감지</p>
                 </div>
                 <div class="icon">
@@ -316,7 +316,7 @@
               <!-- small box -->
               <div class="small-box bg-red">
                 <div class="inner">
-                  <h3 id="dan2-count">{{ dan_count2 }}0</h3>
+                  <h3 id="dan2-count" class="d-inline">{{ dan_count2 }}0</h3><h5 class="d-inline"> 건</h5>
                   <p>이상 감지 현황</p>
                 </div>
                 <div class="icon">
@@ -329,7 +329,7 @@
               <!-- small box -->
               <div class="small-box bg-yellow">
                 <div class="inner">
-                  <h3 id="visitor-count">{{ visitor_count }}</h3>
+                  <h3 id="visitor-count" class="d-inline">{{ visitor_count }}</h3><h5 class="d-inline"> 명</h5>
                   <p>방문객 수</p>
                 </div>
                 <div class="icon">
@@ -342,7 +342,7 @@
               <!-- small box -->
               <div class="small-box bg-aqua">
                 <div class="inner">
-                  <h3>86,300</h3>
+                  <h3 class="d-inline">386,300</h3><h5 class="d-inline"> 원</h5>
                   <p>매출 통계</p>
                 </div>
                 <div class="icon">
@@ -356,20 +356,24 @@
           <div class="row">
             <!-- Left col -->
             <section class="col-lg-7 connectedSortable">
-              <div class="nav-tabs-custom" style="width: 100%; height: 520px;">
-                  <!-- Tabs within a box -->
-                  <ul class="nav nav-tabs pull-right">
-                      <li class="pull-left header"><i class="fa fa-camera"></i> 실시간 CCTV </li>
-                        <div class="box-tools pull-camera" style="margin-left: 72%;">
-                        <button id="lockButton" class="btn btn-outline-dark" data-widget="collapse" onclick="toggleLock()" >
-                          <i id="lockIcon" class="fa fa-lock"></i>
+            <div class="nav-tabs-custom" style="width: 100%; height: 520px;">
+                <!-- Tabs within a box -->
+                <div class="header-container" style="display: flex; justify-content: space-between; align-items: center;">
+                    <ul class="nav nav-tabs">
+                        <li class="header-item"><i class="fa fa-camera"></i> 실시간 CCTV</li>
+                    </ul>
+                    <div class="box-tools">
+                        <button id="lockButton" class="btn btn-outline-dark" data-widget="collapse" onclick="toggleLock()">
+                            <i id="lockIcon" class="fa fa-lock"></i>
                         </button>
-                  </ul>
-                        <div class="tab-content no-padding" style="width: 100%; height: 100%; border: 0;">
-                            <!-- 카메라 스트림 표시를 위한 video 태그 -->
-                            <video id="cameraStream" width="100%" height="100%" autoplay muted></video>
-                        </div>
-              </div>
+                    </div>
+                </div>
+                <div class="tab-content no-padding" style="width: 100%; height: 100%; border: 0;">
+                    <!-- 카메라 스트림 표시를 위한 video 태그 -->
+                    <video id="cameraStream" width="100%" height="100%" autoplay muted></video>
+                </div>
+            </div>
+
                           <br/>
             <!-- Calendar -->
             <div class="box box-solid bg-green-gradient">
@@ -380,7 +384,6 @@
                 <div class="pull-right box-tools">
                   <!-- button with a dropdown -->
                   <button class="btn btn-success btn-sm" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                  <button class="btn btn-success btn-sm" data-widget="remove"><i class="fa fa-times"></i></button>
                 </div><!-- /. tools -->
               </div><!-- /.box-header -->
               <div class="box-body no-padding">
@@ -401,9 +404,8 @@
                     <button class="btn bg-teal btn-sm" id="viewLogsButton">전체 로그 확인</button>
                     <button id="clearLogs" class="btn bg-teal btn-sm">로그 지우기</button>
                     <button id="toggleNotification" class="btn bg-teal btn-sm"><i id="notificationIcon" class="fa fa-bell"></i></button>
-                    <button class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i></button>
                   </div>
-                 <div id="customBoxBody" class="box-body border-radius-none" style="font-size: 25px;">
+                 <div id="customBoxBody" class="box-body border-radius-none" style="font-size: 1.2rem;">
                 </div><!-- /.box-body -->
               </div>
                 </div>
@@ -636,7 +638,7 @@ const codeToWord = {
 
 let ws = null;
 
-// 웹소켓 연결 함수
+// 웹소켓 연결 함수 ws = new WebSocket("wss://noticare.store/ws"); ws = new WebSocket("ws://127.0.0.1:8000/ws");
 function connect() {
     ws = new WebSocket("wss://noticare.store/ws");
 
