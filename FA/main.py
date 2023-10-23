@@ -16,10 +16,10 @@ from sqlalchemy import select,func
 ### 서버 실행 코드: uvicorn main:app --reload ###
 
 # 로케이션 데이터베이스 연결 URL 설정
-#DATABASE_URL = "mysql+pymysql://root:0000@127.0.0.1:3306/security"
+DATABASE_URL = "mysql+pymysql://root:0000@127.0.0.1:3306/security"
 
 # 서버 데이터베이스 연결 URL 설정
-DATABASE_URL = "mysql+pymysql://admin:noticare@db-noticare.cvcrdfcptqp8.ap-northeast-2.rds.amazonaws.com:3306/security"
+#DATABASE_URL = "mysql+pymysql://admin:noticare@db-noticare.cvcrdfcptqp8.ap-northeast-2.rds.amazonaws.com:3306/security"
 
 # 데이터베이스 객체 생성
 database = Database(DATABASE_URL)
@@ -35,7 +35,7 @@ app.mount("/css", StaticFiles(directory="css"), name="css")
 app.mount("/js", StaticFiles(directory="js"), name="js")
 app.mount("/templates", StaticFiles(directory="templates"), name="templates")
 app.mount("/static/mainapp/aboutpage", StaticFiles(directory="static/mainapp/aboutpage"), name="aboutpage")
-
+app.mount("/static/mainapp/aboutus", StaticFiles(directory="static/mainapp/aboutus"), name="aboutus")
 
 # 세션 미들웨어 추가 (사용자 세션 관리를 위함)
 app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
@@ -198,7 +198,7 @@ async def read_page(request: Request, page: str):
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    return RedirectResponse(url="/static/mainapp/aboutpage/aboutus.html")
+    return RedirectResponse(url="/static/mainapp/aboutus/aboutus2.html")
 
 
 # index 경로에 대한 핸들러
