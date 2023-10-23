@@ -34,7 +34,6 @@ app.mount("/bootstrap", StaticFiles(directory="bootstrap"), name="bootstrap")
 app.mount("/css", StaticFiles(directory="css"), name="css")
 app.mount("/js", StaticFiles(directory="js"), name="js")
 app.mount("/templates", StaticFiles(directory="templates"), name="templates")
-app.mount("/static/mainapp/aboutpage", StaticFiles(directory="static/mainapp/aboutpage"), name="aboutpage")
 app.mount("/static/mainapp/aboutus", StaticFiles(directory="static/mainapp/aboutus"), name="aboutus")
 
 # 세션 미들웨어 추가 (사용자 세션 관리를 위함)
