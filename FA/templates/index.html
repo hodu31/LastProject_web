@@ -163,6 +163,9 @@
     height: 420px; /* 원하는 높이로 설정하세요 */
   }
 
+    #viewStoresButton {
+    cursor: pointer; /* 포인터 모양으로 변경 */
+  }
 </style>
 
 </head>
@@ -301,11 +304,11 @@
               <!-- small box -->
               <div class="small-box bg-blue">
                 <div class="inner">
-                <h3 id="dan-count" class="d-inline">{{ dan_count }}</h3><h5 class="d-inline"> 건</h5>
+                <h3 id="dan-count" class="d-inline">{{ dan_count }}0</h3><h5 class="d-inline"> 건</h5>
                   <p>매장 내 행동 감지</p>
                 </div>
                 <div class="icon">
-                  <i class="fa fa-video-camera"></i> <!-- CCTV 아이콘 클래스: fa-video-camera -->
+                  <i class="fa fa-video-camera"></i>
                 </div>
                 <a href="/static/mainapp/pages/charts/morris.html" class="small-box-footer">자세히 <i class="fa fa-arrow-circle-right"></i></a>
               </div>
@@ -327,7 +330,7 @@
               <!-- small box -->
               <div class="small-box bg-yellow">
                 <div class="inner">
-                  <h3 id="visitor-count" class="d-inline">{{ visitor_count }}</h3><h5 class="d-inline"> 명</h5>
+                  <h3 id="visitor-count" class="d-inline">{{ visitor_count }}0</h3><h5 class="d-inline"> 명</h5>
                   <p>방문객 수</p>
                 </div>
                 <div class="icon">
@@ -340,13 +343,13 @@
               <!-- small box -->
               <div class="small-box bg-aqua">
                 <div class="inner">
-                  <h3 class="d-inline">386,300</h3><h5 class="d-inline"> 원</h5>
-                  <p>매출 통계</p>
+                  <h3 id="shop-count" class="d-inline">{{ shop_count }}0</h3><h5 class="d-inline"> 개</h5>
+                  <p>보유 매장</p>
                 </div>
                 <div class="icon">
-                  <i class="ion ion-pie-graph"></i>
+                  <i class="fa fa-home"></i>
                 </div>
-                <a href="/static/mainapp/pages/charts/morris.html" class="small-box-footer">자세히 <i class="fa fa-arrow-circle-right"></i></a>
+                <a id="viewStoresButton" class="small-box-footer">자세히 <i class="fa fa-arrow-circle-right"></i></a>
               </div>
             </div><!-- ./col -->
           </div><!-- /.row -->
@@ -703,6 +706,11 @@ function toggleLock() {
     window.open('/log_table', '_blank', 'width=700,height=600');
 });
 </script>
+<script>
+  document.getElementById('viewStoresButton').addEventListener('click', function() {
+    window.open('/store_table', '_blank', 'width=700,height=600');
+});
+</script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -722,6 +730,11 @@ document.addEventListener("DOMContentLoaded", function() {
       const dan2Response = await fetch("/get_dan_count2");
       const dan2Data = await dan2Response.json();
       document.getElementById("dan2-count").innerText = dan2Data.dan_count2; 
+
+      // shop_count 가져오기
+      const shopResponse = await fetch("/get_shop_count");
+      const shopData = await shopResponse.json();
+      document.getElementById("shop-count").innerText = shopData.shop_count; 
         
     } catch (error) {
       console.error("Could not update counts:", error);

@@ -246,7 +246,7 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
-            Morris Charts
+            Charts
             <small>Preview sample</small>
           </h1>
         </section>
@@ -258,66 +258,57 @@
               <!-- AREA CHART -->
               <div class="box box-primary">
                 <div class="box-header">
-                  <h3 class="box-title"><b>방문객</b> Chart</h3>
+                  <h3 class="box-title"><b>연도별 방문객</b> Chart</h3>
                 </div>
-                <div class="box-body chart-responsive">
+                <div class="box-body chart-responsive" style="width: 100%">
                   <div
                     class="chart"
                     id="revenue-chart"
-                    style="height: 300px"
+                    style="height: 300px; width: 100%"
                   ></div>
                 </div>
                 <!-- /.box-body -->
               </div>
               <!-- /.box -->
+            </div>
 
-              <!-- DONUT CHART -->
+            <!-- DONUT CHART -->
+            <div class="col-md-6">
               <div class="box box-danger">
                 <div class="box-header">
-                  <h3 class="box-title"><b>감지</b> Donut-Chart</h3>
+                  <h3 class="box-title"><b>월별 감지</b> Donut-Chart</h3>
                 </div>
-                <div class="box-body chart-responsive">
+                <div class="box-body chart-responsive" style="width: 100%">
                   <div
                     class="chart"
                     id="sales-chart"
-                    style="height: 300px; position: relative"
+                    style="height: 300px; position: relative; width: 100%"
                   ></div>
                 </div>
                 <!-- /.box-body -->
               </div>
               <!-- /.box -->
             </div>
-            <!-- /.col (LEFT) -->
-            <div class="col-md-6">
-              <!-- LINE CHART -->
-              <div class="box box-info">
-                <div class="box-header">
-                  <h3 class="box-title"><b>Sales</b> Chart</h3>
-                </div>
-                <div class="box-body chart-responsive">
-                  <div
-                    class="chart"
-                    id="line-chart"
-                    style="height: 300px"
-                  ></div>
-                </div>
-                <!-- /.box-body -->
-              </div>
-              <!-- /.box -->
+          </div>
 
-              <!-- BAR CHART -->
+          <!-- BAR CHART -->
+          <div class="row">
+            <div class="col-md-12">
               <div class="box box-success">
                 <div class="box-header">
-                  <h3 class="box-title"><b>감지</b> Bar-Chart</h3>
+                  <h3 class="box-title"><b>연도별 감지</b> Bar-Chart</h3>
                 </div>
-                <div class="box-body chart-responsive">
-                  <div class="chart" id="bar-chart" style="height: 300px"></div>
+                <div class="box-body chart-responsive" style="width: 100%">
+                  <div
+                    class="chart"
+                    id="bar-chart"
+                    style="height: 300px; width: 100%"
+                  ></div>
                 </div>
                 <!-- /.box-body -->
               </div>
               <!-- /.box -->
             </div>
-            <!-- /.col (RIGHT) -->
           </div>
           <!-- /.row -->
         </section>
@@ -461,23 +452,6 @@
           .catch(function (error) {
             console.log('API 호출에 문제가 발생했습니다:', error)
           })
-      })
-
-      // LINE CHART FOR QUARTERLY SALES
-      var sales = new Morris.Line({
-        element: 'line-chart', // 차트가 그려질 요소의 ID
-        resize: true,
-        data: [
-          { y: '2023 Q1', sales: 12666 },
-          { y: '2023 Q2', sales: 22778 },
-          { y: '2023 Q3', sales: 14912 },
-          { y: '2023 Q4', sales: 33767 },
-        ],
-        xkey: 'y',
-        ykeys: ['sales'],
-        labels: ['Sales'],
-        lineColors: ['#3c8dbc'],
-        hideHover: 'auto',
       })
     </script>
   </body>

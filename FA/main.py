@@ -10,13 +10,11 @@ from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.sql import func
 import asyncio
-from sqlalchemy import select,func
-
-
+from sqlalchemy import select,func,join,desc
 ### 서버 실행 코드: uvicorn main:app --reload ###
 
 # 로케이션 데이터베이스 연결 URL 설정
-#DATABASE_URL = "mysql+pymysql://root:0000@127.0.0.1:3306/security"
+# DATABASE_URL = "mysql+pymysql://root:0000@127.0.0.1:3306/security"
 
 # 서버 데이터베이스 연결 URL 설정
 DATABASE_URL = "mysql+pymysql://admin:noticare@db-noticare.cvcrdfcptqp8.ap-northeast-2.rds.amazonaws.com:3306/security"
@@ -115,29 +113,61 @@ async def get_common_data():
 
 
 @app.get("/get_dan_count")
-async def get_dan_count():
-    dan_query = select(LastproDan)
+async def get_dan_count(request: Request):
+    session = request.session
+    user_id = session.get("user_id")
+
+    dan_query = select(LastproDan).where(LastproDan.USER_ID == user_id)
     dans = await database.fetch_all(dan_query)
+    
     return {"dan_count": len(dans)}
 
+
 @app.get("/get_visitor_count")
-async def get_visitor_count():
-    visit_query = select(LastproVisit)  # LastproVisit는 방문자 정보를 담고 있는 테이블이라고 가정합니다.
+async def get_visitor_count(request: Request):
+    session = request.session
+    user_id = session.get("user_id")
+    
+    visit_query = select(LastproVisit).where(LastproVisit.USER_ID == user_id)
     visits = await database.fetch_all(visit_query)
+    
     return {"visitor_count": len(visits)}
 
+
 @app.get("/get_dan_count2")
-async def get_dan_count2():
-    dan_query = select(LastproDan).filter(LastproDan.DAN_CODE.in_([3, 4, 6, 7, 8]))
+async def get_dan_count2(request: Request):
+    session = request.session
+    user_id = session.get("user_id")
+    
+    dan_query = select(LastproDan).where((LastproDan.USER_ID == user_id) & (LastproDan.DAN_CODE.in_([3, 4, 6, 7, 8])))
     dans2 = await database.fetch_all(dan_query)
+    
     return {"dan_count2": len(dans2)}
 
+@app.get("/get_shop_count")
+async def get_shop_count(request: Request):
+    session = request.session
+    user_id = session.get("user_id")
+    
+    # 특정 사용자의 상점 수를 셀 쿼리를 작성합니다.
+    shop_count_query = select(func.count().label("shop_count")).where(LastproShop.USER_ID == user_id)
+    
+    # 데이터베이스에서 결과를 가져옵니다.
+    shop_count_result = await database.fetch_one(shop_count_query)
+    
+    # 결과를 반환합니다.
+    return {"shop_count": shop_count_result["shop_count"]}
+
+
 @app.get("/get_monthly_visitors")
-async def get_monthly_visitors():
-    query = """
+async def get_monthly_visitors(request: Request):
+    session = request.session
+    user_id = session.get("user_id")
+    
+    query = f"""
     SELECT DATE_FORMAT(V_ENTIME, '%Y-%m') as month, COUNT(*) as counts
     FROM LASTPRO_VISIT
-    WHERE YEAR(V_ENTIME) = 2023
+    WHERE YEAR(V_ENTIME) = 2023 AND USER_ID = '{user_id}'
     GROUP BY month
     """
     result = await database.fetch_all(query)
@@ -166,62 +196,42 @@ async def websocket_endpoint(websocket: WebSocket):
         await asyncio.sleep(1)
 
 
-# 모든 페이지에 대한 핸들러
 @app.get("/{page}", response_class=HTMLResponse)
 async def read_page(request: Request, page: str):
-    if page == "favicon.ico":
-        return Response(status_code=204)  # No Content
-    else:
-        # 세션에서 로그인 정보 가져오기
-        user_id = request.session.get("user_id")
-        user = None
-        if user_id:
-            query = select(LastproUser).where(LastproUser.USER_ID == user_id)
-            user = await database.fetch_one(query)
-      
-        # 공통 데이터 가져오기
-        users, shops, visits, dancodes, dans = await get_common_data()
+    user_id = request.session.get("user_id")
+    user = None
+    if user_id:
+        user_query = select(LastproUser).where(LastproUser.USER_ID == user_id)
+        user = await database.fetch_one(user_query)
 
-        # 방문자 수를 사용자 수와 동일한 길이로 출력
-        visitor_count = len(visits)  # 또는 다른 데이터를 사용하여 계산
-        
-        # 이상감지 수를 사용자 수와 동일한 길이로 출력
-        dan_count = len(dans)  # 또는 다른 데이터를 사용하여 계산
-        return templates.TemplateResponse(
-            f"{page}.html", 
-            {"request": request, "user": user, "users": users, "shops": shops, "visits": visits, "dancodes": dancodes, "dans": dans,
-             "visitor_count":visitor_count, "dan_count":dan_count}
-        )
+    # 공통 데이터 가져오기
+    users, common_shops, visits, dancodes, dans = await get_common_data()
+
+    shops = common_shops  # 기본값으로 공통 shops 사용
+
+    # 특정 사용자에 대한 'dans' 정보만 가져오도록 쿼리를 수정
+    if user_id and user:  # user_id와 user 둘 다 있는 경우에만 실행
+        dan_query = select(LastproDan).where(LastproDan.USER_ID == user_id)
+        dans = await database.fetch_all(dan_query)
+
+        # user_id가 있는 경우에만 LastproShop에서 정보를 가져옴
+        shop_query = select(LastproShop).where(LastproShop.USER_ID == user_id)
+        shops = await database.fetch_all(shop_query)
+
+    return templates.TemplateResponse(
+        f"{page}.html", 
+        {
+            "request": request, "user": user, "users": users, "shops": shops,
+            "visits": visits, "dancodes": dancodes, "dans": dans
+        }
+    )
+
 
 
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     return RedirectResponse(url="/static/mainapp/aboutus/aboutus2.html")
-
-
-# index 경로에 대한 핸들러
-@app.get("/index", response_class=HTMLResponse)
-async def read_root(request: Request):
-    user_id = request.session.get("user_id")
-    user = None
-
-    if user_id:
-        query = select(LastproUser).where(LastproUser.USER_ID == user_id)
-        user = await database.fetch_one(query)
-
-    return templates.TemplateResponse("index.html", {"request": request, "user": user})
-
-
-# index3 경로에 대한 핸들러
-@app.get("/index3", response_class=HTMLResponse)
-async def index3_page(request: Request):
-    user_id = request.session.get("user_id")
-    user = None
-    if user_id:
-        query = select(LastproUser).where(LastproUser.USER_ID == user_id)
-        user = await database.fetch_one(query)
-    return templates.TemplateResponse("index3.html", {"request": request, "user": user})
 
 
 
@@ -270,7 +280,6 @@ async def startup():
 async def shutdown():
     await database.disconnect()
 
-### 회원 가입 기능 추가
 @app.post("/signup")
 async def signup(
     request: Request,
@@ -300,5 +309,26 @@ async def signup(
     )
     await database.execute(query)
 
+    last_shop_query = select(LastproShop).where(LastproShop.USER_ID == USER_ID).order_by(desc(LastproShop.SHOP_ID)).limit(1)
+    last_shop = await database.fetch_one(last_shop_query)
+
+    if last_shop:
+        last_id_str = last_shop['SHOP_ID'][1:]  # '#'을 제외한 부분만 추출
+        next_id = int(last_id_str) + 1  # 숫자로 변환 후 1 더하기
+    else:
+        next_id = 1  # 해당 user_id에 대한 데이터가 없을 경우
+
+    new_shop_id = f"#{next_id:03d}"  # 새로운 SHOP_ID 생성 (예: #001, #002, ...)
+
+    # LastproShop 테이블에도 데이터 삽입
+    shop_query = LastproShop.__table__.insert().values(
+        SHOP_ID=new_shop_id,
+        USER_ID=USER_ID
+    )
+    await database.execute(shop_query)
+
     # 로그인 페이지로 리다이렉트
     return RedirectResponse(url="/login", status_code=303)
+
+
+
