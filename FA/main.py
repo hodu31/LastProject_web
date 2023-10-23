@@ -16,10 +16,10 @@ from sqlalchemy import select,func
 ### 서버 실행 코드: uvicorn main:app --reload ###
 
 # 로케이션 데이터베이스 연결 URL 설정
-DATABASE_URL = "mysql+pymysql://root:0000@127.0.0.1:3306/security"
+# DATABASE_URL = "mysql+pymysql://root:0000@127.0.0.1:3306/security"
 
 # 서버 데이터베이스 연결 URL 설정
-#DATABASE_URL = "mysql+pymysql://admin:noticare@db-noticare.cvcrdfcptqp8.ap-northeast-2.rds.amazonaws.com:3306/security"
+DATABASE_URL = "mysql+pymysql://admin:noticare@db-noticare.cvcrdfcptqp8.ap-northeast-2.rds.amazonaws.com:3306/security"
 
 # 데이터베이스 객체 생성
 database = Database(DATABASE_URL)
