@@ -1,7 +1,7 @@
 ### 필요 라이브러리 등
 from fastapi import FastAPI, HTTPException, Form, Request,WebSocket
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, RedirectResponse, Response, JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from starlette.requests import Request
 from sqlalchemy import  Column, String, MetaData, select, Integer, ForeignKey, TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
@@ -10,7 +10,9 @@ from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.sql import func
 import asyncio
-from sqlalchemy import select,func,join,desc
+from sqlalchemy import select,func,desc
+
+
 ### 서버 실행 코드: uvicorn main:app --reload ###
 
 # 로케이션 데이터베이스 연결 URL 설정
@@ -214,9 +216,14 @@ async def read_page(request: Request, page: str):
         dan_query = select(LastproDan).where(LastproDan.USER_ID == user_id)
         dans = await database.fetch_all(dan_query)
 
-        # user_id가 있는 경우에만 LastproShop에서 정보를 가져옴
+    # user_id가 있는 경우에만 LastproShop에서 정보를 가져옴
+    if user_id == "A999":  # "A999"인 경우 모든 상점 정보를 가져옴
+        shop_query = select(LastproShop)
+        shops = await database.fetch_all(shop_query)
+    elif user_id and user:  # 그 외의 경우, 특정 사용자의 상점 정보만 가져옴
         shop_query = select(LastproShop).where(LastproShop.USER_ID == user_id)
         shops = await database.fetch_all(shop_query)
+
 
     return templates.TemplateResponse(
         f"{page}.html", 
@@ -235,6 +242,7 @@ async def read_root(request: Request):
 
 
 
+
 # 가입 페이지에 대한 핸들러
 @app.get("/signup", response_class=HTMLResponse)
 async def signup_page(request: Request):
@@ -244,13 +252,19 @@ async def signup_page(request: Request):
 async def login(request: Request, USER_ID: str = Form(...), USER_PW: str = Form(...)):
     query = select(LastproUser).where(LastproUser.USER_ID == USER_ID)
     user = await database.fetch_one(query)
+
     if not user:
         return templates.TemplateResponse("login.html", {"request": request, "error": "입력한 ID 정보가 없습니다."})
+
     if user.USER_PW != USER_PW:
         return templates.TemplateResponse("login.html", {"request": request, "error": "패스워드가 잘못되었습니다."})
-    
+
     request.session["user_id"] = USER_ID
-    return RedirectResponse(url="/index", status_code=303)
+
+    if USER_ID == "A999":
+        return RedirectResponse(url="/admin", status_code=303)  # A999 사용자는 관리자 페이지로 리디렉트
+    else:
+        return RedirectResponse(url="/index", status_code=303)  # 나머지 사용자는 일반 페이지로 리디렉트
 
 @app.post("/reauthenticate/")
 async def reauthenticate(request: Request, USER_PW: str = Form(...)):
@@ -332,3 +346,17 @@ async def signup(
 
 
 
+@app.post("/admin/add_shop/")
+async def add_shop(SHOP_ID: str = Form(...), USER_ID: str = Form(...)):
+    query = LastproShop.__table__.insert().values(SHOP_ID=SHOP_ID, USER_ID=USER_ID)
+    await database.execute(query)
+    return RedirectResponse(url="/admin", status_code=303)
+
+
+@app.post("/admin/delete_shop/")
+async def delete_shop(SHOP_ID: str = Form(...), USER_ID: str = Form(...)):
+    query = LastproShop.__table__.delete().where(
+        (LastproShop.SHOP_ID == SHOP_ID) & (LastproShop.USER_ID == USER_ID)
+    )
+    await database.execute(query)
+    return RedirectResponse(url="/admin", status_code=303)

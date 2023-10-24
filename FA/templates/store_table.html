@@ -105,14 +105,6 @@
           </div>
           <!-- /.col -->
         </div>
-          <!-- 매장 추가 버튼 -->
-          <button id="add-shop-button" class="btn btn-primary">매장 추가</button>
-
-          <!-- 매장 추가 폼 (초기에는 숨겨져 있음) -->
-          <div id="add-shop-form" style="display: none;">
-            <input id="new-shop-name" type="text" placeholder="추가 할 매장 이름" />
-            <button id="submit-new-shop" class="btn btn-success">추가</button>
-          </div>
     </div>
     
 
@@ -126,46 +118,5 @@
 
     <!-- AdminLTE App -->
     <script src="/static/mainapp/dist/js/app.min.js" type="text/javascript"></script>
-
-<script>
-  // 매장 추가 버튼
-  const addShopButton = document.getElementById("add-shop-button");
-
-  // 매장 추가 폼
-  const addShopForm = document.getElementById("add-shop-form");
-
-  // 새 매장 이름 입력 필드
-  const newShopNameInput = document.getElementById("new-shop-name");
-
-  // 새 매장 추가 제출 버튼
-  const submitNewShopButton = document.getElementById("submit-new-shop");
-
-  // 매장 추가 버튼을 클릭하면 폼을 표시
-  addShopButton.addEventListener("click", () => {
-    addShopForm.style.display = "block";
-  });
-
-  // 새 매장 추가 제출 버튼을 클릭하면 서버에 POST 요청
-  submitNewShopButton.addEventListener("click", async () => {
-    const newShopName = newShopNameInput.value;
-
-    // 서버에 POST 요청을 보내 새 매장을 추가
-    const response = await fetch("/add-shop", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ newShopName }),
-    });
-
-    if (response.ok) {
-      // 성공적으로 매장이 추가되면 페이지를 새로고침하거나 다른 작업을 수행
-      location.reload();
-    } else {
-      alert("매장 추가 실패");
-    }
-  });
-</script>
-
   </body>
 </html>
