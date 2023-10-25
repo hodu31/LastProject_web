@@ -137,21 +137,6 @@
         }
       }
 
-      /* 좌측 사이드 바 드롭다운 토글 아이콘 맞추기 */
-      .sidebar-toggle {
-        position: relative;
-        display: inline-block; /* 블록 요소로 만들어 내부 아이콘과의 간격을 조정할 수 있게 합니다. */
-        padding: 0 20px; /* 오른쪽 패딩을 주어 아이콘을 버튼의 내부 중앙에 위치시킵니다. */
-        line-height: 1.5; /* 버튼 높이와 맞추기 위해 조정합니다. 필요에 따라 값 변경 가능합니다. */
-      }
-
-      .sidebar-toggle::before {
-        content: '\2630'; /* 햄버거 메뉴 아이콘으로 간단한 예를 들었습니다. */
-        position: absolute;
-        right: 10px; /* 오른쪽에서 10px 떨어진 위치에 아이콘을 배치합니다. */
-        top: 50%; /* 상위 요소의 중앙에 아이콘을 배치합니다. */
-        transform: translateY(-50%); /* 아이콘을 수직으로 중앙 정렬합니다. */
-      }
 
       /* 스마트폰 화면에서만 적용되는 미디어 쿼리 */
       @media (max-width: 768px) {
@@ -193,7 +178,7 @@
       .button-container {
         display: flex;
         justify-content: center;
-        margin-top: 40%; /* 테이블과의 간격 */
+        margin-top: 30%; /* 테이블과의 간격 */
       }
 
       .button-container form {
@@ -204,15 +189,9 @@
   <body class="skin-black">
     <div class="wrapper">
       <header class="main-header">
-        <a href="/index3" class="logo"><b>NotiCare-</b>Team 3</a>
+        <a href="/admin" class="logo"><b>NotiCare-</b>Team 3</a>
         <nav class="navbar navbar-static-top" role="navigation">
           <div>
-            <a
-              href="#"
-              class="sidebar-toggle"
-              data-toggle="offcanvas"
-              role="button"
-            ></a>
           </div>
           <div class="navbar-custom-menu">
             <ul class="nav navbar-nav">
@@ -275,12 +254,12 @@
             <div class="pull-left info">
               {% if user %}
               <p>{{ user.USER_NM }}</p>
-              <a href="/index3"
+              <a href="/admin"
                 ><i class="fa fa-circle text-success"></i> Online</a
               >
               {% else %}
               <p>Guest</p>
-              <a href="/index3"
+              <a href="/admin"
                 ><i class="fa fa-circle text-danger"></i> Offline</a
               >
               {% endif %}
@@ -326,29 +305,29 @@
               </table>
             </div>
           </div>
-          <div class="button-container">
-            <form action="/admin/add_shop/" method="post">
-              <input
-                type="text"
-                id="SHOP_ID"
-                name="SHOP_ID"
-                placeholder="승인 Shop ID"
-              />
-              <input
-                type="text"
-                id="USER_ID"
-                name="USER_ID"
-                placeholder="승인 User ID"
-              />
-              <button type="submit">승인</button>
-            </form>
-            <form action="/admin/delete_shop/" method="post">
-              <input type="text" name="SHOP_ID" placeholder="삭제 Shop ID" />
-              <input type="text" name="USER_ID" placeholder="삭제 User ID" />
-              <button type="submit">삭제</button>
-            </form>
-          </div>
         </section>
+        <div class="button-container">
+          <form action="/admin/add_shop/" method="post">
+            <input
+              type="text"
+              id="SHOP_ID"
+              name="SHOP_ID"
+              placeholder="승인 Shop ID"
+            />
+            <input
+              type="text"
+              id="USER_ID"
+              name="USER_ID"
+              placeholder="승인 User ID"
+            />
+            <button type="submit">승인</button>
+          </form>
+          <form action="/admin/delete_shop/" method="post">
+            <input type="text" name="SHOP_ID" placeholder="삭제 Shop ID" />
+            <input type="text" name="USER_ID" placeholder="삭제 User ID" />
+            <button type="submit">삭제</button>
+          </form>
+        </div>
       </div>
     </div>
 
